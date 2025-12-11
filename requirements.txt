@@ -1,4 +1,6 @@
 google-cloud-aiplatform[reasoningengine,langchain]
+uvicorn
+
 
 google-genai
 cloudpickle
