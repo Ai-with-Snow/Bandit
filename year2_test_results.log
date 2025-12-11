@@ -1,0 +1,16 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.1, pluggy-1.6.0 -- C:\Users\Goddexx Snow\Documents\Bandit\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Goddexx Snow\Documents\Bandit
+plugins: anyio-4.12.0, langsmith-0.4.55
+collecting ... collected 7 items
+
+tests/year2/test_year2_multimodal.py::TestCourse2_1_Vision::test_001_single_image_desc PASSED [ 14%]
+tests/year2/test_year2_multimodal.py::TestCourse2_1_Vision::test_002_ocr_capability PASSED [ 28%]
+tests/year2/test_year2_multimodal.py::TestCourse2_1_Vision::test_003_visual_qa PASSED [ 42%]
+tests/year2/test_year2_multimodal.py::TestCourse2_2_Generation::test_004_generate_image_basic PASSED [ 57%]
+tests/year2/test_year2_multimodal.py::TestCourse2_3_AudioVideo::test_005_upload_file_basics PASSED [ 71%]
+tests/year2/test_year2_multimodal.py::TestCourse2_4_Documents::test_006_long_context_doc PASSED [ 85%]
+tests/year2/test_year2_multimodal.py::TestYear2FinalExam::test_final_multimodal_integration PASSED [100%]
+
+======================== 7 passed in 225.40s (0:03:45) ========================

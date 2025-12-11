@@ -1,0 +1,79 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.1, pluggy-1.6.0 -- C:\Users\Goddexx Snow\Documents\Bandit\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Goddexx Snow\Documents\Bandit
+plugins: anyio-4.12.0, langsmith-0.4.55
+collecting ... collected 30 items
+
+tests/year1/test_year1_fundamentals.py::TestCourse1_1_Basics::test_001_api_key_setup SKIPPED [  3%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_1_Basics::test_002_simple_text_generation PASSED [  6%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_1_Basics::test_003_model_selection PASSED [ 10%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_1_Basics::test_004_conversation_history PASSED [ 13%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_1_Basics::test_005_streaming_responses PASSED [ 16%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_1_Basics::test_006_error_handling PASSED [ 20%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_1_Basics::test_007_token_counting PASSED [ 23%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_1_Basics::test_008_rate_limit_awareness PASSED [ 26%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_2_Configuration::test_009_temperature_control PASSED [ 30%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_2_Configuration::test_010_max_output_tokens FAILED [ 33%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_2_Configuration::test_011_safety_settings_basic PASSED [ 36%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_2_Configuration::test_012_system_instructions PASSED [ 40%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_2_Configuration::test_013_stop_sequences PASSED [ 43%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_2_Configuration::test_014_top_p_sampling PASSED [ 46%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_2_Configuration::test_015_top_k_sampling PASSED [ 50%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_3_PromptEngineering::test_016_zero_shot_learning PASSED [ 53%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_3_PromptEngineering::test_017_few_shot_learning PASSED [ 56%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_3_PromptEngineering::test_018_chain_of_thought PASSED [ 60%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_3_PromptEngineering::test_019_structured_prompts PASSED [ 63%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_3_PromptEngineering::test_020_role_based_prompts PASSED [ 66%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_4_SDK::test_021_client_initialization FAILED [ 70%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_4_SDK::test_022_response_parsing PASSED [ 73%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_4_SDK::test_023_usage_metadata FAILED [ 76%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_4_SDK::test_024_model_listing PASSED [ 80%]
+tests/year1/test_year1_fundamentals.py::TestCourse1_4_SDK::test_025_exception_handling PASSED [ 83%]
+tests/year1/test_year1_fundamentals.py::TestYear1FinalExam::test_final_001_build_chatbot PASSED [ 86%]
+tests/year1/test_year1_fundamentals.py::TestYear1FinalExam::test_final_002_error_recovery PASSED [ 90%]
+tests/year1/test_year1_fundamentals.py::TestYear1FinalExam::test_final_003_configuration_mastery PASSED [ 93%]
+tests/year1/test_year1_fundamentals.py::TestYear1FinalExam::test_final_004_streaming_with_config PASSED [ 96%]
+tests/year1/test_year1_fundamentals.py::TestYear1FinalExam::test_final_005_token_optimization PASSED [100%]
+
+================================== FAILURES ===================================
+___________ TestCourse1_2_Configuration.test_010_max_output_tokens ____________
+tests\year1\test_year1_fundamentals.py:274: in test_010_max_output_tokens
+    word_count = len(response.text.split())
+                     ^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'NoneType' object has no attribute 'split'
+---------------------------- Captured stdout setup ----------------------------
+\n\u23f3 Rate limiting: waiting 30.0s before next test...
+______________ TestCourse1_4_SDK.test_021_client_initialization _______________
+tests\year1\test_year1_fundamentals.py:455: in test_021_client_initialization
+    test_client = genai.Client()
+                  ^^^^^^^^^^^^^^
+.venv\Lib\site-packages\google\genai\client.py:271: in __init__
+    self._api_client = self._get_api_client(
+.venv\Lib\site-packages\google\genai\client.py:318: in _get_api_client
+    return BaseApiClient(
+.venv\Lib\site-packages\google\genai\_api_client.py:683: in __init__
+    raise ValueError(
+E   ValueError: Missing key inputs argument! To use the Google AI API, provide (`api_key`) arguments. To use the Google Cloud API, provide (`vertexai`, `project` & `location`) arguments.
+---------------------------- Captured stdout setup ----------------------------
+\n\u23f3 Rate limiting: waiting 30.0s before next test...
+__________________ TestCourse1_4_SDK.test_023_usage_metadata __________________
+tests\year1\test_year1_fundamentals.py:481: in test_023_usage_metadata
+    assert response.usage_metadata.total_tokens >= 0
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pydantic\main.py:1026: in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+E   AttributeError: 'GenerateContentResponseUsageMetadata' object has no attribute 'total_tokens'
+---------------------------- Captured stdout setup ----------------------------
+\n\u23f3 Rate limiting: waiting 30.0s before next test...
+============================== warnings summary ===============================
+tests/year1/test_year1_fundamentals.py::TestCourse1_4_SDK::test_024_model_listing
+  C:\Users\Goddexx Snow\Documents\Bandit\.venv\Lib\site-packages\google\genai\models.py:5771: PydanticDeprecatedSince20: The `copy` method is deprecated; use `model_copy` instead. See the docstring of `BaseModel.copy` for details about how to handle `include` and `exclude`. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    config = config.copy()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/year1/test_year1_fundamentals.py::TestCourse1_2_Configuration::test_010_max_output_tokens
+FAILED tests/year1/test_year1_fundamentals.py::TestCourse1_4_SDK::test_021_client_initialization
+FAILED tests/year1/test_year1_fundamentals.py::TestCourse1_4_SDK::test_023_usage_metadata
+======= 3 failed, 26 passed, 1 skipped, 1 warning in 951.90s (0:15:51) ========

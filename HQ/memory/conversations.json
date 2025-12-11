@@ -1,0 +1,59 @@
+{
+  "sessions": [
+    {
+      "timestamp": "2025-12-05T17:07:10.040349",
+      "messages": [
+        {
+          "role": "user",
+          "content": "hello, are you working?",
+          "timestamp": "2025-12-05T17:06:21.026950"
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-12-05T17:07:56.340712",
+      "messages": [
+        {
+          "role": "user",
+          "content": "hello",
+          "timestamp": "2025-12-05T17:07:36.534469"
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-12-05T17:09:20.423033",
+      "messages": [
+        {
+          "role": "user",
+          "content": "hello, can you hear me?",
+          "timestamp": "2025-12-05T17:08:47.960862"
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-12-05T17:32:04.009173",
+      "messages": [
+        {
+          "role": "user",
+          "content": "generate an image of a futuristic AI agent named Bandit with cyberpunk aesthetic, neon purple and blue colors, standing in a digital command center",
+          "timestamp": "2025-12-05T17:29:29.755933"
+        },
+        {
+          "role": "bandit",
+          "content": "Image generation error: 404 Publisher Model `projects/project-5f169828-6f8d-450b-923/locations/us-central1/publishers/google/models/gemini-3-pro-image-preview` was not found or your project does not have access to it. Please ensure you are using a valid model version. For more information, see: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions",
+          "timestamp": "2025-12-05T17:29:31.669818"
+        },
+        {
+          "role": "user",
+          "content": "hello! introduce yourself",
+          "timestamp": "2025-12-05T17:29:45.248854"
+        },
+        {
+          "role": "bandit",
+          "content": "Image generation error: 404 Publisher Model `projects/project-5f169828-6f8d-450b-923/locations/us-central1/publishers/google/models/gemini-3-pro-image-preview` was not found or your project does not have access to it. Please ensure you are using a valid model version. For more information, see: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions",
+          "timestamp": "2025-12-05T17:29:47.969503"
+        }
+      ]
+    }
+  ]
+}

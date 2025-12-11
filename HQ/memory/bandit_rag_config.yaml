@@ -1,0 +1,121 @@
+# Bandit RAG Configuration
+# Vertex AI Search integration for HQ memory retrieval
+
+rag_config:
+  provider: vertex_ai_search
+  project_id: ${GCP_PROJECT_ID}
+  location: global
+  
+  data_stores:
+    - name: bandit_hq_memory
+      id: ${VERTEX_AI_SEARCH_DATA_STORE_ID}
+      description: "Bandit's core memory - Snow profile, self-model, and operational docs"
+      indexed_paths:
+        - HQ/memory/bandit_snow_profile_year1.yaml
+        - HQ/memory/bandit_self_model_v1.md
+        - HQ/memory/bandit_tools.py
+        - HQ/memory/bandit_system_prompt.md
+
+# Search configurations by use case
+search_profiles:
+  
+  snow_context:
+    description: "Retrieve Snow-specific knowledge for personalized responses"
+    data_store: bandit_hq_memory
+    boost_specs:
+      - field: confidence
+        boost_value: 1.5
+        condition: "sure"
+      - field: category
+        boost_value: 1.2
+        condition_in: ["identity", "nervous_system_and_trauma", "daily_life_and_capacity"]
+    max_results: 10
+    
+  safety_check:
+    description: "Check for escalation triggers and boundaries"
+    data_store: bandit_hq_memory
+    filter: "category = 'boundaries' OR category = 'ethics'"
+    boost_specs:
+      - field: section
+        boost_value: 2.0
+        condition_in: ["Tone, Ethics & Boundaries", "kink_and_intimacy"]
+    max_results: 5
+    
+  task_context:
+    description: "Retrieve task and workflow patterns"
+    data_store: bandit_hq_memory
+    filter: "category IN ('business_and_money', 'creativity_and_art', 'daily_life_and_capacity')"
+    max_results: 8
+
+# Retrieval triggers
+auto_retrieve:
+  # Always retrieve before these operations
+  always:
+    - nervous_system_check
+    - check_escalation
+    - calibrate_tone
+    
+  # Retrieve when keywords detected
+  keyword_triggers:
+    - keywords: ["money", "pricing", "offer", "revenue"]
+      profile: snow_context
+      filter: "category = 'business_and_money'"
+      
+    - keywords: ["overwhelmed", "dissociating", "anxious", "stressed"]
+      profile: snow_context
+      filter: "category = 'nervous_system_and_trauma'"
+      
+    - keywords: ["kink", "dynamic", "dom", "sub", "consent"]
+      profile: safety_check
+      filter: "category = 'kink_and_intimacy'"
+      
+    - keywords: ["identity", "name", "who I am", "Goddexx"]
+      profile: snow_context
+      filter: "category = 'identity'"
+
+# Grounding configuration
+grounding:
+  enabled: true
+  source_attribution: true
+  confidence_threshold: 0.7
+  max_chunks_per_source: 3
+  
+# Memory update triggers
+memory_updates:
+  trigger_phrases:
+    - "forget that"
+    - "that's not true anymore"
+    - "this framing keeps missing me"
+    - "actually, I..."
+    - "correction:"
+  
+  update_process:
+    1: "De-prioritize old assumption"
+    2: "Flag as outdated in profile"
+    3: "Ask one clarifying question if foundational"
+    4: "Update immediately, maintain trust"
+
+# Fade vs stick rules
+persistence_rules:
+  fade:
+    - situational_stressors
+    - temporary_logistics
+    - momentary_moods
+    - one_time_preferences
+    
+  stick:
+    - core_values
+    - boundaries
+    - consent_preferences
+    - nervous_system_patterns
+    - long_term_projects
+    - identity_shaping_info
+
+# Metadata
+metadata:
+  version: 1
+  created: 2025-12-06
+  companion_files:
+    - bandit_snow_profile_year1.yaml
+    - bandit_self_model_v1.md
+    - bandit_tools.py

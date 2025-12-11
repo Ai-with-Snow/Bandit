@@ -1,0 +1,14 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.1, pluggy-1.6.0 -- C:\Users\Goddexx Snow\Documents\Bandit\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Goddexx Snow\Documents\Bandit
+plugins: anyio-4.12.0, langsmith-0.4.55
+collecting ... collected 5 items
+
+tests/year3/test_year3_tools.py::TestCourse3_1_FunctionCalling::test_001_manual_function_declaration PASSED [ 20%]
+tests/year3/test_year3_tools.py::TestCourse3_1_FunctionCalling::test_002_automatic_tool_execution PASSED [ 40%]
+tests/year3/test_year3_tools.py::TestCourse3_2_StructuredOutput::test_003_pydantic_output PASSED [ 60%]
+tests/year3/test_year3_reasoning.py::TestCourse3_3_Reasoning::test_001_logic_puzzle PASSED [ 80%]
+tests/year3/test_year3_reasoning.py::TestCourse3_3_Reasoning::test_002_math_reasoning PASSED [100%]
+
+======================== 5 passed in 126.37s (0:02:06) ========================

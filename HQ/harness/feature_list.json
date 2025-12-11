@@ -1,0 +1,161 @@
+{
+    "features": [
+        {
+            "id": "Y1_FUNDAMENTALS",
+            "category": "Year 1",
+            "description": "Master Gemini API Fundamentals (Basics, Config, Prompting, SDK)",
+            "steps": [
+                "Pass TestCourse1_1_Basics",
+                "Pass TestCourse1_2_Configuration",
+                "Pass TestCourse1_3_PromptEngineering",
+                "Pass TestCourse1_4_SDK",
+                "Pass TestYear1FinalExam"
+            ],
+            "passed": true
+        },
+        {
+            "id": "Y2_MULTIMODAL",
+            "category": "Year 2",
+            "description": "Master Multimodal Capabilities (Vision, Generation, Documents) using Gemini 3 Pro Preview",
+            "steps": [
+                "Pass TestCourse2_1_Vision",
+                "Pass TestCourse2_2_Generation",
+                "Pass TestCourse2_3_AudioVideo",
+                "Pass TestCourse2_4_Documents",
+                "Pass TestYear2FinalExam"
+            ],
+            "passed": true
+        },
+        {
+            "id": "Y3_TOOLS",
+            "category": "Year 3",
+            "description": "Master Tool Use, Function Calling, and JSON Mode using Gemini 3 Pro Preview",
+            "steps": [
+                "Pass TestCourse3_1_FunctionCalling",
+                "Pass TestCourse3_2_StructuredOutput"
+            ],
+            "passed": true
+        },
+        {
+            "id": "Y3_REASONING",
+            "category": "Year 3",
+            "description": "Master Deep Reasoning and Thinking Capabilities (Gemini 3)",
+            "steps": [
+                "Pass TestCourse3_3_Reasoning",
+                "Pass TestYear3FinalExam"
+            ],
+            "passed": true
+        },
+        {
+            "id": "Y3_ECOSYSTEM",
+            "category": "Year 3",
+            "description": "Master Tool Ecosystem (Maps, Search, Code Execution)",
+            "steps": [
+                "Pass TestCourse3_4_Tools"
+            ],
+            "passed": true
+        },
+        {
+            "id": "DATA_SYNC",
+            "category": "Infrastructure",
+            "description": "Implement Async Data Sync (Local SQLite -> BigQuery)",
+            "steps": [
+                "Implement HQ/data/sync_manager.py",
+                "Verify Async Upload to BigQuery"
+            ],
+            "passed": true
+        },
+        {
+            "id": "Y4_PRODUCTION",
+            "category": "Year 4",
+            "description": "Master Production Systems (Context Caching, Batch, Real-Time)",
+            "steps": [
+                "Pass TestCourse4_1_Caching",
+                "Pass TestCourse4_2_Batch",
+                "Pass TestCourse4_3_Realtime",
+                "Pass TestYear4FinalExam"
+            ],
+            "passed": true
+        },
+        {
+            "id": "ARCH_HARNESS",
+            "category": "Architecture",
+            "description": "Implement Persistent Context Harness for Long-Running Agents",
+            "steps": [
+                "Create feature_list.json",
+                "Create bandit_progress.json",
+                "Create init_agent.py",
+                "Verify harnessing logic"
+            ],
+            "passed": true
+        },
+        {
+            "id": "Y5_AGENTS",
+            "category": "Year 5",
+            "description": "Advanced Agent Architectures (ReAct, State Machines, Meta-Prompting)",
+            "steps": [
+                "Pass TestCourse5_1_AgentFrameworks",
+                "Pass TestCourse5_2_AdvancedPrompting",
+                "Pass TestCourse5_3_MultimodalIntegration",
+                "Pass TestCourse5_4_ProductionOptimization",
+                "Pass TestYear5ComprehensiveExam"
+            ],
+            "passed": false
+        },
+        {
+            "id": "Y6_THESIS",
+            "category": "Year 6",
+            "description": "Master's Thesis Project (Research, Implementation, Defense)",
+            "steps": [
+                "Pass TestThesisProposal",
+                "Pass TestResearchImplementation",
+                "Pass TestThesisDefense"
+            ],
+            "passed": false
+        },
+        {
+            "id": "Y7_8_QUALIFYING",
+            "category": "Years 7-8",
+            "description": "PhD Comprehensive Exams & Dissertation Proposal",
+            "steps": [
+                "Pass TestYear7_WrittenComprehensives",
+                "Pass TestYear8_OralQualifying",
+                "Pass TestYear8_CommitteeFormation"
+            ],
+            "passed": false
+        },
+        {
+            "id": "Y9_10_DISSERTATION",
+            "category": "Years 9-10",
+            "description": "Dissertation Research (Algorithm Development, Publication)",
+            "steps": [
+                "Pass TestYear9_AlgorithmDevelopment",
+                "Pass TestYear10_ResultsConsolidation"
+            ],
+            "passed": false
+        },
+        {
+            "id": "Y11_DEFENSE_PREP",
+            "category": "Year 11",
+            "description": "Publication & Defense Preparation",
+            "steps": [
+                "Pass TestJournalPublication",
+                "Pass TestDissertationWriting",
+                "Pass TestDefensePreparation"
+            ],
+            "passed": false
+        },
+        {
+            "id": "Y12_PHD_DEFENSE",
+            "category": "Year 12",
+            "description": "PhD Defense & Gemini API Mastery Achievement",
+            "steps": [
+                "Pass TestFinalDefense",
+                "Pass TestPhDCompletion",
+                "Pass TestPostDoctoralPlanning",
+                "Pass TestGeminiMastery"
+            ],
+            "passed": false
+        }
+    ]
+}

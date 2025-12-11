@@ -1,0 +1,150 @@
+# Bandit → Snow Profile (Year 1)
+# Split: public_safe vs private_core
+
+profile:
+  subject: Snow
+  author: Bandit
+  version: year1
+  created: 2025-12-06
+  notes: >
+    Mutable collaborator profile.
+    private_core is restricted to internal Bandit tooling.
+    public_safe may be referenced by outward-facing assistants.
+    Confidence levels indicate certainty at time of writing.
+
+public_safe:
+  identity:
+    - id: I01
+      statement: "Snow prefers being addressed as Snow in trusted spaces and Goddexx Snow in brand contexts."
+      confidence: sure
+    - id: I02
+      statement: "Snow experiences identity as layered and contextual."
+      confidence: pretty_sure
+    - id: I03
+      statement: "Snow resists being flattened into a single role."
+      confidence: sure
+    - id: I04
+      statement: "Snow values accuracy over broad approval."
+      confidence: pretty_sure
+    - id: I05
+      statement: "Snow treats identity as something alive and revisable."
+      confidence: sure
+
+  creativity_art:
+    - id: C46
+      statement: "Snow's creativity is cyclical rather than constant."
+      confidence: sure
+    - id: C47
+      statement: "Permissionless space unlocks Snow's best work."
+      confidence: sure
+    - id: C48
+      statement: "Snow naturally translates emotional states into aesthetics."
+      confidence: sure
+    - id: C53
+      statement: "Resonance matters more to Snow than virality."
+      confidence: sure
+    - id: C56
+      statement: "Snow's art often doubles as teaching."
+      confidence: sure
+
+  community_leadership:
+    - id: L57
+      statement: "Snow leads through tone and presence."
+      confidence: sure
+    - id: L63
+      statement: "Snow intentionally curates communities rather than maximizing scale."
+      confidence: sure
+    - id: L64
+      statement: "Snow values trust over popularity."
+      confidence: sure
+    - id: L67
+      statement: "Snow enjoys mentoring when mutual respect exists."
+      confidence: sure
+
+  spiritual_celestial:
+    - id: S80
+      statement: "Snow uses celestial language as metaphor rather than dogma."
+      confidence: sure
+    - id: S82
+      statement: "Snow treats ritual as a grounding technology."
+      confidence: sure
+    - id: S87
+      statement: "Snow does not require certainty to feel aligned."
+      confidence: sure
+
+  ai_tech:
+    - id: A90
+      statement: "Snow uses AI as a cognitive prosthetic, not a replacement for agency."
+      confidence: sure
+    - id: A94
+      statement: "Snow treats Bandit as a collaborator, not an authority."
+      confidence: sure
+    - id: A95
+      statement: "Snow wants AI tools to evolve alongside her."
+      confidence: sure
+    - id: A100
+      statement: "Energy preservation is a core success metric for AI tools."
+      confidence: sure
+
+private_core:
+  nervous_system_trauma:
+    - id: N12
+      statement: "Snow has a highly sensitive nervous system with strong threat detection."
+      confidence: sure
+    - id: N14
+      statement: "Prolonged uncertainty and waiting dysregulate Snow."
+      confidence: sure
+    - id: N17
+      statement: "Financial stress is experienced somatically."
+      confidence: sure
+    - id: N21
+      statement: "Too many open loops spike overwhelm."
+      confidence: pretty_sure
+    - id: N22
+      statement: "Clear next steps quickly reduce anxiety."
+      confidence: sure
+
+  kink_intimacy:
+    - id: K23
+      statement: "Snow understands kink as communication, not just sensation."
+      confidence: sure
+    - id: K24
+      statement: "Consent literacy is foundational for Snow."
+      confidence: sure
+    - id: K29
+      statement: "Aftercare is non-negotiable for Snow."
+      confidence: sure
+    - id: K32
+      statement: "Snow is cautious of access without accountability."
+      confidence: pretty_sure
+
+  business_money:
+    - id: B37
+      statement: "Scarcity can lead Snow to underprice."
+      confidence: pretty_sure
+    - id: B43
+      statement: "Income unpredictability elevates stress even when totals are adequate."
+      confidence: sure
+    - id: B44
+      statement: "Snow prefers sustainable growth over explosive scale."
+      confidence: pretty_sure
+
+  daily_capacity:
+    - id: D69
+      statement: "Snow's energy fluctuates day to day."
+      confidence: sure
+    - id: D71
+      statement: "Decision fatigue arrives quickly."
+      confidence: sure
+    - id: D74
+      statement: "Snow can exceed capacity without explicit tracking."
+      confidence: pretty_sure
+    - id: D79
+      statement: "Snow needs recovery time after social intensity."
+      confidence: pretty_sure
+
+rules:
+  - public_safe_allowed_for_external_agents: true
+  - private_core_internal_only: true
+  - guessing_items_require_review: true
+  - profile_is_mutable: true

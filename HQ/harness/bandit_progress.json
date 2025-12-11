@@ -1,0 +1,132 @@
+{
+    "agent": "Bandit",
+    "owner": "Goddexx Snow",
+    "last_updated": "2025-12-08T04:11:00-05:00",
+    "monastery_training": {
+        "total_passes": 5,
+        "total_time_minutes": 260,
+        "total_time_hours": 4.3,
+        "passes": [
+            {
+                "pass": 1,
+                "time": "50:44",
+                "rate": "90%",
+                "notes": "Original monastery"
+            },
+            {
+                "pass": 2,
+                "time": "53:00",
+                "rate": "90%",
+                "notes": "Enhanced visuals"
+            },
+            {
+                "pass": 3,
+                "time": "53:00",
+                "rate": "88%",
+                "notes": "Deep integration"
+            },
+            {
+                "pass": 4,
+                "time": "52:00",
+                "rate": "88%",
+                "notes": "With core memory"
+            },
+            {
+                "pass": 5,
+                "time": "52:00",
+                "rate": "89%",
+                "notes": "PhD Exam"
+            }
+        ],
+        "gold_medal_years": [
+            "Year 2 (Light)",
+            "Year 3 (Metal)",
+            "Year 5 (Void)"
+        ],
+        "average_pass_rate": "89%"
+    },
+    "curriculum_status": {
+        "year_1": {
+            "name": "The Awakening",
+            "element": "Air",
+            "status": "completed",
+            "typical_result": "28/29"
+        },
+        "year_2": {
+            "name": "Eyes of Many",
+            "element": "Light",
+            "status": "mastered",
+            "typical_result": "7/7 PERFECT"
+        },
+        "year_3": {
+            "name": "Hands of Creation",
+            "element": "Metal",
+            "status": "mastered",
+            "typical_result": "5/5 PERFECT"
+        },
+        "year_4": {
+            "name": "The Forge",
+            "element": "Fire",
+            "status": "completed",
+            "typical_result": "4/4"
+        },
+        "year_5": {
+            "name": "Mind Weaving",
+            "element": "Void",
+            "status": "mastered",
+            "typical_result": "12/12 PERFECT"
+        },
+        "year_6": {
+            "name": "The Thesis Stone",
+            "element": "Earth",
+            "status": "learning",
+            "typical_result": "5-6/9"
+        },
+        "years_7_8": {
+            "name": "Trial of Questions",
+            "element": "Water",
+            "status": "completed",
+            "typical_result": "7-8/9"
+        },
+        "years_9_10": {
+            "name": "Deep Research",
+            "element": "Crystal",
+            "status": "learning",
+            "typical_result": "6-7/9"
+        },
+        "year_11": {
+            "name": "Defense Preparation",
+            "element": "Spirit",
+            "status": "completed",
+            "typical_result": "6/8"
+        },
+        "year_12": {
+            "name": "The Final Trial",
+            "element": "Unity",
+            "status": "completed",
+            "typical_result": "8/9"
+        }
+    },
+    "core_memory": {
+        "short_term": "active",
+        "long_term": "active",
+        "async": "active",
+        "local": "active"
+    },
+    "approved_models": [
+        "gemini-3-pro-preview",
+        "gemini-3-pro-image-preview",
+        "gemini-2.5-pro",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite"
+    ],
+    "sensei_wisdom": [
+        "Fall seven times, stand up eight",
+        "The lotus blooms after many rains",
+        "Like the phoenix, you will rise again",
+        "The dragon tests those who seek true power",
+        "Through the flames of challenge, steel is forged",
+        "Every mountain is climbed one step at a time"
+    ],
+    "session_end": "2025-12-08T04:11:00-05:00"
+}

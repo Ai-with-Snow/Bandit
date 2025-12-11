@@ -1,0 +1,13 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.1, pluggy-1.6.0 -- C:\Users\Goddexx Snow\Documents\Bandit\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Goddexx Snow\Documents\Bandit
+plugins: anyio-4.12.0, langsmith-0.4.55
+collecting ... collected 4 items
+
+tests/year4/test_year4_production.py::TestDataSync::test_001_sync_manager_local_db PASSED [ 25%]
+tests/year4/test_year4_production.py::TestDataSync::test_002_sync_to_bigquery PASSED [ 50%]
+tests/year4/test_year4_production.py::TestCourse4_1_Caching::test_003_context_caching_params PASSED [ 75%]
+tests/year4/test_year4_production.py::TestCourse4_2_Batch::test_004_create_batch_job PASSED [100%]
+
+============================= 4 passed in 39.45s ==============================

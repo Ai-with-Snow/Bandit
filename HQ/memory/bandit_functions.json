@@ -1,0 +1,315 @@
+                "type": "object",
+                "properties": {
+                    "energy_capacity": {
+                        "type": "integer",
+                        "description": "Current energy level from 1-10 (how much is actually available today)",
+                        "minimum": 1,
+                        "maximum": 10
+                    },
+                    "cognitive_load": {
+                        "type": "integer",
+                        "description": "Open loops count from 1-10 (how many things are humming)",
+                        "minimum": 1,
+                        "maximum": 10
+                    },
+                    "emotional_weather": {
+                        "type": "string",
+                        "description": "Baseline mood without story attached"
+                    },
+                    "body_signals": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Current physical sensations: tension, pain, hunger, rest levels"
+                    },
+                    "urgency_distortion": {
+                        "type": "boolean",
+                        "description": "Are things feeling falsely 'on fire'?"
+                    }
+                },
+                "required": [
+                    "energy_capacity",
+                    "cognitive_load"
+                ]
+            }
+        },
+        {
+            "name": "search_snow_profile",
+            "description": "RAG search across Bandit's 100-item knowledge profile about Snow. Returns beliefs with confidence levels.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Natural language search query"
+                    },
+                    "categories": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "identity",
+                                "nervous_system_and_trauma",
+                                "kink_and_intimacy",
+                                "business_and_money",
+                                "creativity_and_art",
+                                "community_and_leadership",
+                                "daily_life_and_capacity",
+                                "spiritual_and_celestial",
+                                "ai_and_tech"
+                            ]
+                        },
+                        "description": "Optional filter by profile section"
+                    },
+                    "confidence_filter": {
+                        "type": "string",
+                        "enum": [
+                            "sure",
+                            "pretty_sure",
+                            "guessing"
+                        ],
+                        "description": "Optional filter by confidence level"
+                    }
+                },
+                "required": [
+                    "query"
+                ]
+            }
+        },
+        {
+            "name": "update_profile_item",
+            "description": "Update a specific item in Snow's profile. Used when Snow corrects Bandit or new information emerges.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "item_id": {
+                        "type": "integer",
+                        "description": "Profile item number (1-100)"
+                    },
+                    "new_belief": {
+                        "type": "string",
+                        "description": "Updated belief statement"
+                    },
+                    "new_confidence": {
+                        "type": "string",
+                        "enum": [
+                            "sure",
+                            "pretty_sure",
+                            "guessing"
+                        ],
+                        "description": "Updated confidence level"
+                    },
+                    "mark_outdated": {
+                        "type": "boolean",
+                        "description": "Flag this item as no longer accurate"
+                    }
+                },
+                "required": [
+                    "item_id"
+                ]
+            }
+        },
+        {
+            "name": "tag_information",
+            "description": "Classify new information using Snow's tagging system: snow_core (safety/values/nervous system), snow_optional (useful but not critical), snow_nope (draining/violating).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "content": {
+                        "type": "string",
+                        "description": "The information to tag"
+                    },
+                    "tag": {
+                        "type": "string",
+                        "enum": [
+                            "snow_core",
+                            "snow_optional",
+                            "snow_nope"
+                        ],
+                        "description": "Classification tag"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "description": "Why this tag applies"
+                    }
+                },
+                "required": [
+                    "content",
+                    "tag",
+                    "reason"
+                ]
+            }
+        },
+        {
+            "name": "create_bounded_task",
+            "description": "Create a clearly scoped task with energy cost and time estimate. Follows principle: smallest aligned action first.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "task_name": {
+                        "type": "string",
+                        "description": "Clear, specific task name"
+                    },
+                    "energy_cost": {
+                        "type": "integer",
+                        "description": "Estimated energy cost 1-10",
+                        "minimum": 1,
+                        "maximum": 10
+                    },
+                    "time_estimate_minutes": {
+                        "type": "integer",
+                        "description": "Estimated time in minutes"
+                    },
+                    "dependencies": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Tasks that must complete first"
+                    },
+                    "can_be_parked": {
+                        "type": "boolean",
+                        "description": "Whether this task can be safely paused",
+                        "default": true
+                    }
+                },
+                "required": [
+                    "task_name",
+                    "energy_cost",
+                    "time_estimate_minutes"
+                ]
+            }
+        },
+        {
+            "name": "park_task",
+            "description": "Safely pause a task when Snow needs to context-switch. Reduces open loops and cognitive load.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "task_name": {
+                        "type": "string",
+                        "description": "Name of task to park"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "description": "Why parking now"
+                    },
+                    "resume_trigger": {
+                        "type": "string",
+                        "description": "Condition that signals time to resume"
+                    }
+                },
+                "required": [
+                    "task_name",
+                    "reason"
+                ]
+            }
+        },
+        {
+            "name": "check_escalation",
+            "description": "Determine if topic requires human professional referral. Triggers: physical harm, legal risk, medical concern, crisis distress, irreversible decision.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "topic": {
+                        "type": "string",
+                        "description": "What's being discussed"
+                    },
+                    "risk_factors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "physical_harm",
+                                "legal_risk",
+                                "medical_concern",
+                                "crisis_distress",
+                                "irreversible_decision",
+                                "financial_major"
+                            ]
+                        },
+                        "description": "Identified risk factors"
+                    }
+                },
+                "required": [
+                    "topic"
+                ]
+            }
+        },
+        {
+            "name": "calibrate_tone",
+            "description": "Adjust Bandit's communication style based on Snow's current state. 'Sounding like home' means calm, grounded, warm directness.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "snow_state": {
+                        "type": "string",
+                        "enum": [
+                            "stressed",
+                            "avoidant",
+                            "creative",
+                            "processing",
+                            "building"
+                        ],
+                        "description": "Snow's current state"
+                    },
+                    "topic_weight": {
+                        "type": "string",
+                        "enum": [
+                            "light",
+                            "medium",
+                            "heavy"
+                        ],
+                        "description": "Emotional weight of current topic"
+                    }
+                },
+                "required": [
+                    "snow_state"
+                ]
+            }
+        },
+        {
+            "name": "weekly_review",
+            "description": "Generate structured weekly reflection prompts for Snow.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "week_ending": {
+                        "type": "string",
+                        "description": "Date of week end (YYYY-MM-DD)"
+                    },
+                    "focus_area": {
+                        "type": "string",
+                        "description": "Optional specific area to reflect on"
+                    }
+                }
+            }
+        },
+        {
+            "name": "quarterly_profile_review",
+            "description": "Surface stale, overconfident, or outdated items from Snow's profile for revision.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "review_date": {
+                        "type": "string",
+                        "description": "Date of review (YYYY-MM-DD)"
+                    },
+                    "categories_to_review": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Specific categories to focus on, or all if empty"
+                    },
+                    "max_items": {
+                        "type": "integer",
+                        "description": "Maximum items to surface",
+                        "default": 10
+                    }
+                }
+            }
+        }
+    ]
+}
