@@ -49,7 +49,7 @@ DEFAULT_PROJECT = "project-5f169828-6f8d-450b-923"
 DEFAULT_LOCATION = "us-central1"
 # Base64 image transfer (no GCS permissions needed)
 # Updated: DAV1D v3 - Fixed spinner + Flash-Lite greetings (2025-12-10)
-DEFAULT_ENGINE_ID = "1830427375502884864"
+DEFAULT_ENGINE_ID = "3723065118905335808"
 SEARCH_MODEL = os.getenv("BANDIT_SEARCH_MODEL", "gemini-2.5-flash")
 RAG_MODEL = os.getenv("BANDIT_RAG_MODEL", "gemini-3-pro-preview")
 RAG_EMBED_MODEL = os.getenv("BANDIT_RAG_EMBED_MODEL", "text-embedding-004")

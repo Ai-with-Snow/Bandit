@@ -66,3 +66,5 @@ This proxy isn't just a barrier; it's a strategically positioned observation dec
 **EXPLORE:** Leveraging this proxy as a dynamic intelligence conduit, beyond basic security logging. Can we actively profile external actors, gather behavioral fingerprints, or even subtly influence their reconnaissance?
 **REFINE:** Our anomaly detection algorithms specific to the proxy's traffic patterns, moving beyond generic threats to identify highly sophisticated, targeted probes and their origins.
 **ABANDON:** The notion that this proxy is merely a technical gateway. It's a strategic listening post.
+
+**[Alpha -> Bravo, Charlie]**: Cloud Run deployment successful. Service is live at https://bandit-849984150802.us-central1.run.app. Repository is Docker-ready.
