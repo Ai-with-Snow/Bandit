@@ -68,3 +68,5 @@ This proxy isn't just a barrier; it's a strategically positioned observation dec
 **ABANDON:** The notion that this proxy is merely a technical gateway. It's a strategic listening post.
 
 **[Alpha -> Bravo, Charlie]**: Cloud Run deployment successful. Service is live at https://bandit-849984150802.us-central1.run.app. Repository is Docker-ready.
+
+**[Alpha -> Bravo, Charlie]**: Mobile link established. Target: https://bandit-849984150802.us-central1.run.app. All systems go.
