@@ -5,68 +5,30 @@ import { View, Text, StyleSheet, Animated } from 'react-native';
 import { theme } from '../constants/theme';
 
 export function ThinkingIndicator() {
-    const dots = [useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current];
+    const [step, setStep] = React.useState(0);
+    const steps = [
+        "Analyzing query parameters...",
+        "Routing to Neural Link...",
+        "Consulting Model [Gemini 2.5 Pro]...",
+        "Simulating reasoning paths...",
+        "Synthesizing response...",
+        "Finalizing output..."
+    ];
 
     useEffect(() => {
-        const animations = dots.map((dot, index) => {
-            return Animated.loop(
-                Animated.sequence([
-                    Animated.delay(index * 200),
-                    Animated.timing(dot, {
-                        toValue: 1,
-                        duration: 400,
-                        useNativeDriver: true,
-                    }),
-                    Animated.timing(dot, {
-                        toValue: 0,
-                        duration: 400,
-                        useNativeDriver: true,
-                    }),
-                ])
-            );
-        });
-
-        animations.forEach(anim => anim.start());
-
-        return () => {
-            animations.forEach(anim => anim.stop());
-        };
+        const interval = setInterval(() => {
+            setStep((prev) => (prev + 1) % steps.length);
+        }, 800); // Fast updates like a terminal
+        return () => clearInterval(interval);
     }, []);
 
     return (
         <View style={styles.container}>
-            <View style={styles.avatarContainer}>
-                <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>B</Text>
-                </View>
-            </View>
-
             <View style={styles.contentContainer}>
-                <Text style={styles.roleText}>Bandit</Text>
-                <View style={styles.dotsContainer}>
-                    {dots.map((dot, index) => (
-                        <Animated.View
-                            key={index}
-                            style={[
-                                styles.dot,
-                                {
-                                    opacity: dot.interpolate({
-                                        inputRange: [0, 1],
-                                        outputRange: [0.3, 1],
-                                    }),
-                                    transform: [
-                                        {
-                                            scale: dot.interpolate({
-                                                inputRange: [0, 1],
-                                                outputRange: [0.8, 1.2],
-                                            }),
-                                        },
-                                    ],
-                                },
-                            ]}
-                        />
-                    ))}
-                </View>
+                <Text style={styles.roleText}>BANDIT // SYSTEMS</Text>
+                <Text style={styles.thinkingText}>
+                    {steps[step]} <Text style={styles.cursor}>_</Text>
+                </Text>
             </View>
         </View>
     );
@@ -78,42 +40,33 @@ const styles = StyleSheet.create({
         paddingHorizontal: theme.spacing.md,
         paddingVertical: theme.spacing.sm,
         marginVertical: theme.spacing.xs,
+        borderLeftWidth: 2,
+        borderLeftColor: theme.colors.primary,
+        marginLeft: theme.spacing.lg,
+        backgroundColor: 'rgba(0, 0, 0, 0.02)',
     },
     avatarContainer: {
         marginRight: theme.spacing.md,
-    },
-    avatar: {
-        width: 32,
-        height: 32,
-        borderRadius: theme.borderRadius.sm,
-        backgroundColor: theme.colors.primary,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    avatarText: {
-        color: theme.colors.text,
-        fontSize: theme.fontSize.sm,
-        fontWeight: '600',
+        display: 'none', // Hide avatar for thinking block
     },
     contentContainer: {
         flex: 1,
     },
     roleText: {
-        color: theme.colors.text,
+        color: theme.colors.primary,
+        fontSize: theme.fontSize.xs,
+        fontWeight: '700',
+        marginBottom: 4,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    thinkingText: {
+        color: theme.colors.textDim,
         fontSize: theme.fontSize.sm,
-        fontWeight: '600',
-        marginBottom: theme.spacing.xs,
+        fontFamily: 'monospace', // Monospace for terminal feel
     },
-    dotsContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        height: 24,
-    },
-    dot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: theme.colors.primary,
-        marginRight: 6,
-    },
+    cursor: {
+        color: theme.colors.primary,
+        fontWeight: 'bold',
+    }
 });

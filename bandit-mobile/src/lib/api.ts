@@ -1,10 +1,10 @@
 import { Platform } from 'react-native';
 
 const PROXY_URL = Platform.select({
-    android: 'https://bandit-849984150802.us-central1.run.app/v1/chat/completions',
-    ios: 'https://bandit-849984150802.us-central1.run.app/v1/chat/completions',
-    web: 'https://bandit-849984150802.us-central1.run.app/v1/chat/completions',
-    default: 'https://bandit-849984150802.us-central1.run.app/v1/chat/completions',
+    android: 'http://192.168.1.122:8000/v1/chat/completions', // Physical device - use local network IP
+    ios: 'http://localhost:8000/v1/chat/completions',
+    web: 'http://localhost:8000/v1/chat/completions',
+    default: 'http://localhost:8000/v1/chat/completions',
 });
 
 export interface BanditResponse {
@@ -18,20 +18,36 @@ export interface Message {
     id: string;
     role: 'user' | 'bandit';
     content: string;
+    attachments?: { type: 'image' | 'file', uri: string, name?: string, base64?: string }[];
     timestamp: Date;
+}
+
+export interface Project {
+    id: string;
+    name: string;
+    description?: string;
+    color?: string;
+    icon?: string;
+    createdAt: Date;
 }
 
 export interface Conversation {
     id: string;
     title: string;
     messages: Message[];
+    projectId?: string; // Link to a project
     createdAt: Date;
     updatedAt: Date;
 }
 
+export type ThinkingMode = 'auto' | 'instant' | 'thinking';
+
 export async function queryBandit(
     prompt: string,
-    accessToken: string
+    accessToken: string,
+    thinkingMode: ThinkingMode = 'instant',
+    attachments: { type: 'image' | 'file', base64: string }[] = [],
+    webSearch: boolean = false
 ): Promise<BanditResponse> {
     const startTime = Date.now();
 
@@ -40,12 +56,16 @@ export async function queryBandit(
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
             },
             body: JSON.stringify({
                 model: 'bandit-v1.0',
                 messages: [
-                    { role: 'user', content: prompt }
-                ]
+                    { role: 'user', content: prompt } // Proxy will handle multimodal if content is complex, or we add attachments here
+                ],
+                thinking_mode: thinkingMode,
+                attachments: attachments, // Pass to proxy
+                web_search: webSearch     // Pass to proxy
             }),
         });
 

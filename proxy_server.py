@@ -1,6 +1,14 @@
 import os
+import re
+import base64
+import json
+import asyncio
+import threading
+from collections import OrderedDict
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any, Union
@@ -9,6 +17,66 @@ from google.auth.transport.requests import Request as GoogleRequest
 from scripts.bandit_cli import get_engine_resource_name, DEFAULT_PROJECT, DEFAULT_LOCATION, DEFAULT_ENGINE_ID
 import requests
 import time
+from google import genai
+from google.genai import types
+
+# Background response cache (LRU-style, max 100 entries)
+BACKGROUND_CACHE: OrderedDict = OrderedDict()
+CACHE_MAX_SIZE = 100
+CACHE_LOCK = threading.Lock()
+
+# Model tiers for different response modes
+FAST_MODEL = "gemini-2.5-flash-lite"        # Instant mode - fastest, low latency
+FULL_MODEL = "gemini-2.5-pro"               # Auto mode - balanced
+DEEP_THINK_MODEL = "gemini-3-pro-preview"   # Deep think - maximum reasoning
+
+# Natural language patterns that trigger deep thinking
+DEEP_THINK_PATTERNS = [
+    r'\bthink\s*(harder|deeply|more)\b',
+    r'\bdeep\s*think\b',
+    r'\bultra\s*think\b',
+    r'\breason\s*(through|about|deeply)\b',
+    r'\banalyze\s*(carefully|deeply|thoroughly)\b',
+    r'\btake\s*your\s*time\b',
+    r'\bcareful(ly)?\s*consider\b',
+]
+
+# God-Level Domain Detection (from 500+ AI Projects Repository)
+GOD_LEVEL_DOMAINS = {
+    "nlp": {
+        "name": "NLP Deity",
+        "keywords": ["nlp", "text analysis", "sentiment", "translate", "summarize", "ner", "language model"],
+        "boost": "You have mastery of 900+ NLP techniques from the Treasure of Transformers and funNLP repositories."
+    },
+    "computer_vision": {
+        "name": "Vision Omniscience",
+        "keywords": ["image", "vision", "detect", "recognize", "camera", "photo", "video", "ocr"],
+        "boost": "You have mastery of 1500+ computer vision algorithms from LearnOpenCV and Awesome-CV."
+    },
+    "deep_learning": {
+        "name": "Deep Learning Architect",
+        "keywords": ["neural", "train model", "deep learning", "architecture", "tensorflow", "pytorch"],
+        "boost": "You have mastery of 2500+ deep learning implementations from TopDeepLearning and DL Drizzle."
+    },
+    "agents": {
+        "name": "Agent Overlord", 
+        "keywords": ["multi-agent", "orchestrate", "autonomous", "agent coordination", "chatbot"],
+        "boost": "You have mastery of 500+ agent systems from Awesome-Chatbot and Production ML."
+    },
+    "research": {
+        "name": "Research Deity",
+        "keywords": ["research", "paper", "sota", "state of the art", "benchmark"],
+        "boost": "You have access to state-of-the-art results and latest AI research papers."
+    }
+}
+
+def detect_god_level_domain(prompt: str) -> dict | None:
+    """Detect if prompt requires god-level domain expertise."""
+    prompt_lower = prompt.lower()
+    for domain_key, domain_info in GOD_LEVEL_DOMAINS.items():
+        if any(kw in prompt_lower for kw in domain_info["keywords"]):
+            return domain_info
+    return None
 
 app = FastAPI(title="Bandit Proxy API", description="OpenAI-compatible proxy for Bandit Reasoning Engine")
 
@@ -21,10 +89,219 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Startup time for uptime tracking
+STARTUP_TIME = time.time()
+VERSION = "2.0.0"  # God-Level Edition
+
+# Pre-initialize genai client at startup to reduce request latency
+try:
+    from scripts.bandit_cli import DEFAULT_PROJECT
+    GENAI_CLIENT = genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="us-central1")
+    print(f"[INIT] Pre-initialized genai client for project: {DEFAULT_PROJECT}")
+    print(f"[INIT] God-Level domains loaded: {list(GOD_LEVEL_DOMAINS.keys())}")
+except Exception as e:
+    GENAI_CLIENT = None
+    print(f"[INIT WARNING] Failed to pre-initialize genai client: {e}")
+
+# Auth token cache (tokens valid for ~60 min, refresh at 55 min)
+AUTH_TOKEN_CACHE = {"token": None, "expires_at": 0}
+AUTH_TOKEN_TTL = 55 * 60  # 55 minutes
+
+# Health Check Endpoint
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring and diagnostics."""
+    uptime_seconds = int(time.time() - STARTUP_TIME)
+    
+    # Test auth status
+    auth_status = "unknown"
+    try:
+        token = get_auth_token()
+        auth_status = "ok" if token else "failed"
+    except Exception as e:
+        auth_status = f"error: {str(e)[:50]}"
+    
+    return {
+        "status": "healthy",
+        "version": VERSION,
+        "uptime_seconds": uptime_seconds,
+        "auth_status": auth_status,
+        "engine_id": DEFAULT_ENGINE_ID,
+        "location": DEFAULT_LOCATION,
+        "project": DEFAULT_PROJECT
+    }
+
+@app.get("/")
+async def root():
+    """Root endpoint with basic info."""
+    return {
+        "name": "Bandit Proxy API",
+        "version": VERSION,
+        "docs": "/docs",
+        "health": "/health",
+        "cache": "/v1/cache",
+        "a2a": "/.well-known/agent.json",
+        "rpc": "/rpc"
+    }
+
+# ══════════════════════════════════════════════════════════════════════════════
+# A2A (Agent-to-Agent) PROTOCOL ENDPOINTS
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Bandit's advertised skills for A2A discovery
+BANDIT_SKILLS = [
+    {"name": "chat", "description": "General conversation and Q&A powered by Gemini"},
+    {"name": "reasoning", "description": "Deep reasoning via Vertex AI Reasoning Engine"},
+    {"name": "multimodal", "description": "Image understanding via Gemini Vision"},
+    {"name": "search", "description": "Web-grounded search via Google Search"},
+    {"name": "code", "description": "Code generation, explanation, and debugging"},
+    {"name": "instant", "description": "Fast responses using gemini-2.5-flash-lite"},
+    {"name": "thinking", "description": "Deep thinking mode using gemini-3-pro-preview"},
+]
+
+@app.get("/.well-known/agent.json")
+async def agent_card(request: Request):
+    """
+    A2A Agent Card endpoint for discovery.
+    Who Visions Fleet standard - allows Leader and peers to discover capabilities.
+    """
+    return {
+        "name": "Bandit",
+        "version": VERSION,
+        "description": "Advanced reasoning assistant powered by Gemini and Vertex AI Reasoning Engine. Specializes in deep thinking, multimodal understanding, and code generation.",
+        "capabilities": [
+            "text-generation",
+            "code-generation",
+            "code-analysis",
+            "reasoning",
+            "multimodal",
+            "web-search"
+        ],
+        "endpoints": {
+            "chat": "/v1/chat/completions",
+            "health": "/health"
+        },
+        "extensions": {
+            "color": "bold magenta",
+            "role": "Reasoning Engine",
+            "models": {
+                "instant": FAST_MODEL,
+                "auto": FULL_MODEL,
+                "thinking": DEEP_THINK_MODEL
+            },
+            "skills": BANDIT_SKILLS,
+            "rpc": "/rpc"
+        }
+    }
+
+@app.post("/rpc")
+async def rpc_endpoint(request: Request):
+    """
+    A2A JSON-RPC endpoint for agent-to-agent communication.
+    
+    Supported methods:
+    - ask: Send a query to Bandit (uses existing chat logic)
+    - list_skills: Get available skills
+    - get_status: Get agent status
+    """
+    import uuid
+    
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse(
+            status_code=400,
+            content={"jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}, "id": None}
+        )
+    
+    method = body.get("method", "")
+    params = body.get("params", {})
+    request_id = body.get("id", str(uuid.uuid4()))
+    
+    # Route to handlers
+    if method == "ask":
+        result = await a2a_handle_ask(params)
+    elif method == "list_skills":
+        result = {"skills": BANDIT_SKILLS}
+    elif method == "get_status":
+        result = {
+            "agent": "bandit",
+            "version": VERSION,
+            "status": "online",
+            "uptime_seconds": int(time.time() - STARTUP_TIME),
+            "skills_count": len(BANDIT_SKILLS),
+            "models": {"instant": FAST_MODEL, "auto": FULL_MODEL, "thinking": DEEP_THINK_MODEL},
+            "god_level_domains": list(GOD_LEVEL_DOMAINS.keys())
+        }
+    else:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "jsonrpc": "2.0",
+                "error": {"code": -32601, "message": f"Method not found: {method}"},
+                "id": request_id
+            }
+        )
+    
+    return {"jsonrpc": "2.0", "result": result, "id": request_id}
+
+async def a2a_handle_ask(params: dict) -> dict:
+    """Handle A2A 'ask' method by calling the existing chat logic."""
+    query = params.get("query", "")
+    thinking_mode = params.get("thinking_mode", "instant")
+    
+    if not query:
+        return {"error": "Missing 'query' parameter"}
+    
+    try:
+        # Use the instant path for A2A calls (fast responses)
+        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="us-central1")
+        
+        response = client.models.generate_content(
+            model=FAST_MODEL if thinking_mode == "instant" else FULL_MODEL,
+            contents=query,
+            config=types.GenerateContentConfig(
+                system_instruction="You are Bandit, an AI assistant. Be helpful and concise.",
+                temperature=0.7,
+                max_output_tokens=1024,
+            )
+        )
+        
+        return {
+            "response": response.text,
+            "agent": "bandit",
+            "model": FAST_MODEL if thinking_mode == "instant" else FULL_MODEL,
+            "thinking_mode": thinking_mode
+        }
+    except Exception as e:
+        return {"error": str(e), "agent": "bandit"}
+
+# Import for JSONResponse
+from fastapi.responses import JSONResponse
+
+@app.get("/v1/cache")
+async def get_cached_response(prompt: str = ""):
+    """Retrieve a cached background response if available."""
+    if not prompt:
+        return {"cached": False, "cache_size": len(BACKGROUND_CACHE)}
+    
+    key = cache_key(prompt)
+    cached = cache_get(key)
+    
+    if cached:
+        return {
+            "cached": True,
+            "response": cached,
+            "model": "bandit-reasoning-engine",
+            "key": key[:8]
+        }
+    
+    return {"cached": False, "key": key[:8]}
+
 # Models
 class Message(BaseModel):
     role: str
-    content: str
+    content: Union[str, List[Dict[str, Any]]]
     name: Optional[str] = None
 
 class ChatCompletionRequest(BaseModel):
@@ -33,6 +310,7 @@ class ChatCompletionRequest(BaseModel):
     temperature: Optional[float] = 0.7
     max_tokens: Optional[int] = None
     stream: bool = False
+    thinking_mode: Optional[str] = "auto"  # 'instant' = flash-lite bypass, 'thinking' = full reasoning, 'auto' = adaptive
 
 class Choice(BaseModel):
     index: int
@@ -47,82 +325,307 @@ class ChatCompletionResponse(BaseModel):
     choices: List[Choice]
     usage: Dict[str, int]
 
-# Auth Helper
-def get_auth_token():
-    credentials, project = google.auth.default()
-    if not credentials.valid:
-        if credentials.expired and credentials.refresh_token:
-            credentials.refresh(GoogleRequest())
+# Deep thinking detection
+def detect_deep_thinking(prompt: str) -> bool:
+    """Detect if the user's prompt requests deep thinking/reasoning."""
+    prompt_lower = prompt.lower()
+    for pattern in DEEP_THINK_PATTERNS:
+        if re.search(pattern, prompt_lower, re.IGNORECASE):
+            return True
+    return False
+
+def cache_key(prompt: str) -> str:
+    """Generate a cache key from prompt."""
+    import hashlib
+    return hashlib.md5(prompt.encode()).hexdigest()[:16]
+
+def cache_set(key: str, value: str):
+    """Store a value in the background cache."""
+    with CACHE_LOCK:
+        if key in BACKGROUND_CACHE:
+            BACKGROUND_CACHE.move_to_end(key)
+        BACKGROUND_CACHE[key] = {"response": value, "timestamp": time.time()}
+        while len(BACKGROUND_CACHE) > CACHE_MAX_SIZE:
+            BACKGROUND_CACHE.popitem(last=False)
+
+def cache_get(key: str) -> Optional[str]:
+    """Retrieve a value from the background cache."""
+    with CACHE_LOCK:
+        if key in BACKGROUND_CACHE:
+            BACKGROUND_CACHE.move_to_end(key)
+            return BACKGROUND_CACHE[key]["response"]
+        return None
+
+def background_reasoning_query(prompt: str, cache_key_str: str):
+    """Run a background query to the Reasoning Engine and cache the result."""
+    try:
+        print(f"[BACKGROUND] Starting Reasoning Engine query for key: {cache_key_str[:8]}...")
+        start = time.time()
+        
+        token = get_auth_token()
+        if not token:
+            print("[BACKGROUND] Failed to get auth token")
+            return
+        
+        resource_name = get_engine_resource_name(DEFAULT_PROJECT, DEFAULT_LOCATION, DEFAULT_ENGINE_ID)
+        api_endpoint = f"https://{DEFAULT_LOCATION}-aiplatform.googleapis.com/v1beta1/{resource_name}:query"
+        
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "input": {"prompt": prompt},
+            "classMethod": "query"
+        }
+        
+        response = requests.post(api_endpoint, headers=headers, json=payload, timeout=120)
+        
+        if response.status_code == 200:
+            result_json = response.json()
+            bandit_response = result_json.get("output", "")
+            if isinstance(bandit_response, dict):
+                bandit_response = str(bandit_response)
+            
+            cache_set(cache_key_str, bandit_response)
+            elapsed = time.time() - start
+            print(f"[BACKGROUND] Cached response in {elapsed:.2f}s for key: {cache_key_str[:8]}")
         else:
-            # Fallback for local dev if default credentials aren't fully set up
-            try:
-                import subprocess
-                result = subprocess.run(
-                    ["gcloud", "auth", "print-access-token"],
-                    capture_output=True, text=True, check=True, shell=True
-                )
-                return result.stdout.strip()
-            except Exception as e:
-                print(f"Auth Error: {e}")
-                return None
-    return credentials.token
+            print(f"[BACKGROUND] Error: {response.status_code}")
+            
+    except Exception as e:
+        print(f"[BACKGROUND ERROR] {e}")
+
+# Auth Helper with caching
+def get_auth_token():
+    """Get authentication token for GCP API calls. Uses cache to avoid latency spikes."""
+    global AUTH_TOKEN_CACHE
+    
+    # Check cache first
+    now = time.time()
+    if AUTH_TOKEN_CACHE["token"] and AUTH_TOKEN_CACHE["expires_at"] > now:
+        return AUTH_TOKEN_CACHE["token"]  # Return cached token (silent - no print)
+    
+    try:
+        credentials, project = google.auth.default()
+        
+        if not credentials.valid or credentials.expired:
+            credentials.refresh(GoogleRequest())
+        
+        token = credentials.token
+        if token:
+            AUTH_TOKEN_CACHE["token"] = token
+            AUTH_TOKEN_CACHE["expires_at"] = now + AUTH_TOKEN_TTL
+            print(f"[AUTH] Token refreshed and cached for {AUTH_TOKEN_TTL//60} min")
+            return token
+            
+    except Exception as e:
+        print(f"[AUTH ERROR] {e}")
+        # Fallback to gcloud
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["gcloud", "auth", "print-access-token"],
+                capture_output=True, text=True, shell=True, timeout=10
+            )
+            if result.returncode == 0:
+                token = result.stdout.strip().split('\n')[-1]
+                if token.startswith('ya29.'):
+                    AUTH_TOKEN_CACHE["token"] = token
+                    AUTH_TOKEN_CACHE["expires_at"] = now + AUTH_TOKEN_TTL
+                    print(f"[AUTH] Token from gcloud, cached for {AUTH_TOKEN_TTL//60} min")
+                    return token
+        except Exception as e2:
+            print(f"[AUTH ERROR] Fallback failed: {e2}")
+    
+    return None
+
+def parse_gemini_content(content: Union[str, List[Dict[str, Any]]]) -> tuple[str, Any]:
+    """
+    Parse OpenAI-style content into (text_prompt, gemini_contents).
+    Returns:
+        text_prompt: A string representation for logging/reasoning-engine fallback.
+        gemini_contents: A format suitable for client.models.generate_content.
+    """
+    if isinstance(content, str):
+        return content, content
+    
+    # Handle list of parts (Multimodal)
+    text_parts = []
+    gemini_parts = []
+    
+    for part in content:
+        if part.get("type") == "text":
+            text_val = part.get("text", "")
+            text_parts.append(text_val)
+            gemini_parts.append(types.Part.from_text(text=text_val))
+            
+        elif part.get("type") == "image_url":
+            image_url = part.get("image_url", {}).get("url", "")
+            # Expecting data:image/jpeg;base64,.....
+            if image_url.startswith("data:"):
+                try:
+                    header, encoded = image_url.split(",", 1)
+                    mime_type = header.split(":")[1].split(";")[0]
+                    data = base64.b64decode(encoded)
+                    gemini_parts.append(types.Part.from_bytes(data=data, mime_type=mime_type))
+                    text_parts.append("[Image]")
+                except Exception as e:
+                    print(f"[IMAGE ERROR] Failed to decode base64: {e}")
+            else:
+                # Handle standard URLs if needed, but for now just log it
+                text_parts.append(f"[Image URL: {image_url}]")
+
+    prompt_text = "\n".join(text_parts)
+    return prompt_text, gemini_parts
 
 # Proxy Endpoint
 @app.post("/v1/chat/completions", response_model=ChatCompletionResponse)
 async def chat_completions(request: ChatCompletionRequest):
     start_time = time.time()
     
-    # 1. Get Authentication
-    token = get_auth_token()
-    if not token:
-        raise HTTPException(status_code=500, detail="Failed to get authentication token")
-    
-    # 2. Extract Prompt (Last user message for simplicity, or full context)
-    # Bandit accepts a 'prompt' string. We'll concatenate recent history or just take the last msg.
-    # Ideally, Bandit's MemoryManager handles history, so we just send the NEW user input.
+    # Extract Prompt
     last_user_msg = next((m for m in reversed(request.messages) if m.role == "user"), None)
     if not last_user_msg:
         raise HTTPException(status_code=400, detail="No user message found")
     
-    prompt = last_user_msg.content
+    original_prompt, gemini_contents = parse_gemini_content(last_user_msg.content)
     
-    # 3. Call Bandit Reasoning Engine
-    resource_name = get_engine_resource_name(DEFAULT_PROJECT, DEFAULT_LOCATION, DEFAULT_ENGINE_ID)
-    api_endpoint = f"https://{DEFAULT_LOCATION}-aiplatform.googleapis.com/v1beta1/{resource_name}:query"
+    # Skip time injection for instant mode (reduces latency)
+    if request.thinking_mode == "instant":
+        prompt = original_prompt
+    else:
+        ny_time = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M:%S %Z")
+        prompt = f"[Current Time: {ny_time}]\n{original_prompt}"
+        # Update gemini_contents if it's just a string, otherwise prepend time? 
+        # For simplicity, if multimodal, we keep gemini_contents as Parts and just rely on the model.
+        # If string, we update it.
+        if isinstance(gemini_contents, str):
+            gemini_contents = prompt
+        # TODO: Handle multimodal time injection cleanly if needed, but usually image queries are direct.
     
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
+    thinking_mode = request.thinking_mode or "auto"
+    bandit_response = ""
+    model_used = ""
     
-    payload = {
-        "input": {"prompt": prompt},
-        "classMethod": "query"
-    }
+    # Check for natural language deep thinking triggers in auto mode
+    if thinking_mode == "auto" and detect_deep_thinking(original_prompt):
+        print(f"[AUTO] Detected deep thinking request in prompt, upgrading to 'thinking' mode")
+        thinking_mode = "thinking"
     
-    try:
-        response = requests.post(api_endpoint, headers=headers, json=payload, timeout=120)
+    # FAST PATH: Use gemini-2.5-flash-lite directly (bypasses Reasoning Engine routing)
+    if thinking_mode == "instant":
+        try:
+            print(f"[FAST PATH] Using {FAST_MODEL}...")
+            client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="us-central1")
+            
+            response = client.models.generate_content(
+                model=FAST_MODEL,
+                contents=gemini_contents,
+                config=types.GenerateContentConfig(
+                    system_instruction="You are Bandit, a fast AI assistant. Be concise.",
+                    temperature=0.7,
+                    max_output_tokens=1024,
+                )
+            )
+            
+            bandit_response = response.text
+            model_used = FAST_MODEL
+            elapsed = time.time() - start_time
+            print(f"[FAST PATH] Completed in {elapsed:.2f}s")
+            
+            # Fire background query to Reasoning Engine for richer response
+            key = cache_key(prompt)
+            if not cache_get(key):  # Only if not already cached
+                bg_thread = threading.Thread(
+                    target=background_reasoning_query,
+                    args=(prompt, key),
+                    daemon=True
+                )
+                bg_thread.start()
+                print(f"[FAST PATH] Spawned background query thread")
+            
+        except Exception as e:
+            print(f"[FAST PATH ERROR] {e}, falling back...")
+            thinking_mode = "auto"  # Fall back to full path
+    
+    # DEEP THINK PATH: Use gemini-3-pro-preview for maximum reasoning
+    if thinking_mode == "thinking" and not bandit_response:
+        try:
+            print(f"[DEEP THINK] Using {DEEP_THINK_MODEL} for deep reasoning...")
+            client = genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="us-central1")
+            
+            # System instruction for deep thinking mode
+            system_instruction = """You are Bandit, an advanced AI assistant with deep reasoning capabilities.
+Take your time to think through problems carefully and thoroughly.
+Provide detailed, well-reasoned responses. You're in deep thinking mode."""
+            
+            response = client.models.generate_content(
+                model=DEEP_THINK_MODEL,
+                contents=gemini_contents,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    temperature=0.7,
+                    max_output_tokens=8192,
+                )
+            )
+            
+            bandit_response = response.text
+            model_used = DEEP_THINK_MODEL
+            elapsed = time.time() - start_time
+            print(f"[DEEP THINK] Completed in {elapsed:.2f}s")
+            
+        except Exception as e:
+            print(f"[DEEP THINK ERROR] {e}, falling back to Reasoning Engine...")
+            thinking_mode = "auto"  # Fall back to full path
+    
+    # FULL PATH: Use Reasoning Engine (for 'thinking' and 'auto' modes, or fallback)
+    if not bandit_response:
+        # Get Authentication
+        token = get_auth_token()
+        if not token:
+            raise HTTPException(status_code=500, detail="Failed to get authentication token")
         
-        if response.status_code != 200:
-            raise HTTPException(status_code=response.status_code, detail=f"Bandit Error: {response.text}")
+        resource_name = get_engine_resource_name(DEFAULT_PROJECT, DEFAULT_LOCATION, DEFAULT_ENGINE_ID)
+        api_endpoint = f"https://{DEFAULT_LOCATION}-aiplatform.googleapis.com/v1beta1/{resource_name}:query"
         
-        result_json = response.json()
-        bandit_response = result_json.get("output", "")
-        # Fallback if output structure varies
-        if isinstance(bandit_response, dict):
-             bandit_response = str(bandit_response)
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
         
-    except requests.exceptions.Timeout:
-        raise HTTPException(status_code=504, detail="Bandit Request Timed Out")
-    except Exception as e:
-        print(f"Proxy Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        payload = {
+            "input": {"prompt": prompt},
+            "classMethod": "query"
+        }
         
-    # 4. Format OpenAI Response
+        try:
+            print(f"[FULL PATH] Using Reasoning Engine...")
+            response = requests.post(api_endpoint, headers=headers, json=payload, timeout=120)
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail=f"Bandit Error: {response.text}")
+            
+            result_json = response.json()
+            bandit_response = result_json.get("output", "")
+            if isinstance(bandit_response, dict):
+                bandit_response = str(bandit_response)
+            model_used = "bandit-reasoning-engine"
+            elapsed = time.time() - start_time
+            print(f"[FULL PATH] Completed in {elapsed:.2f}s")
+                
+        except requests.exceptions.Timeout:
+            raise HTTPException(status_code=504, detail="Bandit Request Timed Out")
+        except Exception as e:
+            print(f"Proxy Error: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+        
+    # Format OpenAI Response
     return ChatCompletionResponse(
         id=f"chatcmpl-{int(time.time())}",
         created=int(time.time()),
-        model=request.model,
+        model=model_used or request.model,
         choices=[
             Choice(
                 index=0,
@@ -130,9 +633,9 @@ async def chat_completions(request: ChatCompletionRequest):
                 finish_reason="stop"
             )
         ],
-        usage={"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0} # Placeholder
+        usage={"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
     )
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
+    port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)

@@ -1,7 +1,7 @@
 // ChatBubble component - displays messages like ChatGPT/Claude
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { theme } from '../constants/theme';
 import { Message } from '../lib/api';
 
@@ -13,23 +13,50 @@ export function ChatBubble({ message }: ChatBubbleProps) {
     const isUser = message.role === 'user';
 
     return (
-        <View style={[styles.container, isUser && styles.userContainer]}>
-            <View style={styles.avatarContainer}>
-                <View style={[styles.avatar, isUser ? styles.userAvatar : styles.banditAvatar]}>
-                    <Text style={styles.avatarText}>
-                        {isUser ? 'U' : 'B'}
+        <View className={`px-8 py-4 ${isUser ? 'items-end' : 'items-start'}`}>
+            <View className={`max-w-[75%] ${isUser ? 'items-end' : 'items-start'}`}>
+                {/* Label */}
+                {!isUser && (
+                    <Text className="text-sm font-semibold text-brand-text mb-2">
+                        Somatic Healer
+                    </Text>
+                )}
+
+                {/* Bubble */}
+                <View className={`rounded-3xl px-6 py-4 shadow-lg ${isUser
+                    ? 'bg-white/70'
+                    : 'bg-[#D4C5F9]/60'
+                    }`} style={{
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 8,
+                    }}>
+                    {message.attachments && message.attachments.length > 0 && (
+                        <View className="flex-row flex-wrap gap-2 mb-3">
+                            {message.attachments.map((att, index) => (
+                                att.type === 'image' ? (
+                                    <Image
+                                        key={index}
+                                        source={{ uri: att.uri }}
+                                        className="w-48 h-48 rounded-2xl"
+                                        resizeMode="cover"
+                                    />
+                                ) : (
+                                    <View key={index} className="p-3 bg-white/30 rounded-2xl">
+                                        <Text className="text-brand-text text-sm">{att.name || 'File'}</Text>
+                                    </View>
+                                )
+                            ))}
+                        </View>
+                    )}
+                    <Text className="text-brand-text text-base leading-7">
+                        {message.content}
                     </Text>
                 </View>
-            </View>
 
-            <View style={styles.contentContainer}>
-                <Text style={[styles.roleText, isUser && styles.userRoleText]}>
-                    {isUser ? 'You' : 'Bandit'}
-                </Text>
-                <View style={[styles.bubble, isUser ? styles.userBubble : styles.banditBubble]}>
-                    <Text style={styles.messageText}>{message.content}</Text>
-                </View>
-                <Text style={styles.timestamp}>
+                {/* Timestamp */}
+                <Text className="text-xs text-brand-text-timestamp mt-2 mx-2">
                     {formatTimestamp(message.timestamp)}
                 </Text>
             </View>
@@ -47,69 +74,3 @@ function formatTimestamp(date: Date): string {
 
     return date.toLocaleDateString();
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        paddingHorizontal: theme.spacing.md,
-        paddingVertical: theme.spacing.sm,
-        marginVertical: theme.spacing.xs,
-    },
-    userContainer: {
-        backgroundColor: theme.colors.surfaceLight,
-    },
-    avatarContainer: {
-        marginRight: theme.spacing.md,
-    },
-    avatar: {
-        width: 32,
-        height: 32,
-        borderRadius: theme.borderRadius.sm,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    userAvatar: {
-        backgroundColor: theme.colors.accent,
-    },
-    banditAvatar: {
-        backgroundColor: theme.colors.primary,
-    },
-    avatarText: {
-        color: theme.colors.text,
-        fontSize: theme.fontSize.sm,
-        fontWeight: '600',
-    },
-    contentContainer: {
-        flex: 1,
-    },
-    roleText: {
-        color: theme.colors.text,
-        fontSize: theme.fontSize.sm,
-        fontWeight: '600',
-        marginBottom: theme.spacing.xs,
-    },
-    userRoleText: {
-        color: theme.colors.accent,
-    },
-    bubble: {
-        borderRadius: theme.borderRadius.md,
-        paddingHorizontal: theme.spacing.md,
-        paddingVertical: theme.spacing.sm,
-    },
-    userBubble: {
-        backgroundColor: 'transparent',
-    },
-    banditBubble: {
-        backgroundColor: 'transparent',
-    },
-    messageText: {
-        color: theme.colors.text,
-        fontSize: theme.fontSize.md,
-        lineHeight: 24,
-    },
-    timestamp: {
-        color: theme.colors.textDim,
-        fontSize: theme.fontSize.xs,
-        marginTop: theme.spacing.xs,
-    },
-});

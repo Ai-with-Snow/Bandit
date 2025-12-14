@@ -7,6 +7,121 @@ from enum import Enum
 import json
 
 
+# ============================================================
+# GOD-LEVEL CAPABILITY DOMAINS
+# ============================================================
+# Organizes Bandit's knowledge areas across AI/ML disciplines
+# Source: 500+ AI Projects Repository
+# ============================================================
+
+GOD_TIER_DOMAINS = {
+    "nlp": {
+        "name": "NLP Mastery",
+        "resources": 900,
+        "key_repos": [
+            "Treasure-of-Transformers",
+            "funNLP",
+            "awesome-nlp",
+            "awesome-sentence-embedding"
+        ],
+        "capabilities": [
+            "sentiment_analysis",
+            "named_entity_recognition",
+            "machine_translation",
+            "text_summarization",
+            "question_answering",
+            "semantic_search"
+        ],
+        "keywords": ["nlp", "text", "sentiment", "translate", "summarize", "ner", "language"]
+    },
+    "computer_vision": {
+        "name": "Computer Vision God",
+        "resources": 1500,
+        "key_repos": [
+            "awesome-computer-vision",
+            "learnopencv",
+            "365-Days-Computer-Vision-Learning"
+        ],
+        "capabilities": [
+            "object_detection",
+            "image_segmentation",
+            "ocr",
+            "pose_estimation",
+            "real_time_tracking",
+            "3d_vision"
+        ],
+        "keywords": ["image", "vision", "detect", "recognize", "camera", "photo", "video", "ocr"]
+    },
+    "deep_learning": {
+        "name": "Deep Learning Master",
+        "resources": 2500,
+        "key_repos": [
+            "TopDeepLearning",
+            "deep-learning-drizzle",
+            "awesome-deep-learning"
+        ],
+        "capabilities": [
+            "cnn_architectures",
+            "rnn_lstm_transformer",
+            "generative_models",
+            "automl",
+            "model_optimization",
+            "production_deployment"
+        ],
+        "keywords": ["neural", "train", "model", "deep learning", "architecture", "tensorflow", "pytorch"]
+    },
+    "agents": {
+        "name": "Agent Overlord",
+        "resources": 500,
+        "key_repos": [
+            "Awesome-Chatbot",
+            "awesome-production-machine-learning",
+            "awesome-multimodal-ml"
+        ],
+        "capabilities": [
+            "multi_agent_orchestration",
+            "autonomous_planning",
+            "tool_use",
+            "self_improving_loops",
+            "production_deployment"
+        ],
+        "keywords": ["agent", "multi-agent", "orchestrate", "autonomous", "plan", "chatbot"]
+    },
+    "research": {
+        "name": "Research Deity",
+        "resources": 1000,
+        "key_repos": [
+            "state-of-the-art-result-for-machine-learning-problems",
+            "Best_AI_paper",
+            "pwc"
+        ],
+        "capabilities": [
+            "sota_implementation",
+            "paper_reproduction",
+            "novel_architectures",
+            "benchmark_evaluation"
+        ],
+        "keywords": ["research", "paper", "sota", "state of the art", "benchmark"]
+    }
+}
+
+
+def detect_god_level_domain(prompt: str) -> str | None:
+    """Detect if prompt requires god-level domain expertise."""
+    prompt_lower = prompt.lower()
+    for domain_key, domain_info in GOD_TIER_DOMAINS.items():
+        if any(kw in prompt_lower for kw in domain_info["keywords"]):
+            return domain_key
+    return None
+
+
+def get_domain_capabilities(domain: str) -> List[str]:
+    """Get capabilities for a specific god-level domain."""
+    if domain in GOD_TIER_DOMAINS:
+        return GOD_TIER_DOMAINS[domain]["capabilities"]
+    return []
+
+
 class ConfidenceLevel(str, Enum):
     SURE = "sure"
     PRETTY_SURE = "pretty_sure"

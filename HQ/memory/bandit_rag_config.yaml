@@ -111,11 +111,83 @@ persistence_rules:
     - long_term_projects
     - identity_shaping_info
 
+# God-Level Knowledge Sources
+# Curated from 500+ AI Projects Repository
+god_level_sources:
+  nlp:
+    name: "NLP Knowledge Base"
+    resources: 900
+    key_repos:
+      - "ashishpatel26/Treasure-of-Transformers"
+      - "fighting41love/funNLP"
+      - "keon/awesome-nlp"
+    trigger_keywords:
+      - "nlp"
+      - "text analysis"
+      - "sentiment"
+      - "translate"
+      - "summarize"
+      - "ner"
+      
+  computer_vision:
+    name: "CV Knowledge Base"
+    resources: 1500
+    key_repos:
+      - "jbhuang0604/awesome-computer-vision"
+      - "spmallick/learnopencv"
+      - "ashishpatel26/365-Days-Computer-Vision-Learning-Linkedin-Post"
+    trigger_keywords:
+      - "image"
+      - "vision"
+      - "detect"
+      - "recognize"
+      - "ocr"
+      
+  deep_learning:
+    name: "Deep Learning Knowledge Base"
+    resources: 2500
+    key_repos:
+      - "aymericdamien/TopDeepLearning"
+      - "kmario23/deep-learning-drizzle"
+    trigger_keywords:
+      - "neural"
+      - "deep learning"
+      - "train model"
+      - "architecture"
+      
+  agents:
+    name: "Agent Systems Knowledge Base"
+    resources: 500
+    key_repos:
+      - "fendouai/Awesome-Chatbot"
+      - "EthicalML/awesome-production-machine-learning"
+    trigger_keywords:
+      - "multi-agent"
+      - "autonomous"
+      - "orchestrate"
+      
+  research:
+    name: "Research Knowledge Base"
+    resources: 1000
+    key_repos:
+      - "RedditSota/state-of-the-art-result-for-machine-learning-problems"
+      - "louisfb01/Best_AI_paper_2020"
+    trigger_keywords:
+      - "research"
+      - "paper"
+      - "sota"
+      - "benchmark"
+
 # Metadata
 metadata:
-  version: 1
+  version: 2
   created: 2025-12-06
+  updated: 2025-12-11
+  god_level_enabled: true
+  total_god_tier_resources: 6400
   companion_files:
     - bandit_snow_profile_year1.yaml
     - bandit_self_model_v1.md
     - bandit_tools.py
+    - god_level_resources.md
+

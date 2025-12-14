@@ -1,10 +1,41 @@
 // Local storage helpers for conversations
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Conversation, Message } from './api';
+import { Conversation, Message, Project } from './api';
 
 const CONVERSATIONS_KEY = '@bandit_conversations';
 const CURRENT_CONVERSATION_KEY = '@bandit_current';
+const PROJECTS_KEY = '@bandit_projects';
+
+/**
+ * Save all projects to storage
+ */
+export async function saveProjects(projects: Project[]): Promise<void> {
+    try {
+        await AsyncStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+    } catch (error) {
+        console.error('Failed to save projects:', error);
+    }
+}
+
+/**
+ * Load all projects from storage
+ */
+export async function loadProjects(): Promise<Project[]> {
+    try {
+        const data = await AsyncStorage.getItem(PROJECTS_KEY);
+        if (!data) return [];
+
+        const parsed = JSON.parse(data);
+        return parsed.map((proj: any) => ({
+            ...proj,
+            createdAt: new Date(proj.createdAt),
+        }));
+    } catch (error) {
+        console.error('Failed to load projects:', error);
+        return [];
+    }
+}
 
 /**
  * Save all conversations to storage
