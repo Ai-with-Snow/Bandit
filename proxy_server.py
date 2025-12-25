@@ -91,7 +91,7 @@ app.add_middleware(
 
 # Startup time for uptime tracking
 STARTUP_TIME = time.time()
-VERSION = "3.0.0"  # Gemini 3 + KRONOS Fleet Edition
+VERSION = "3.1.0"  # Full Gemini 3 Tool Suite Edition
 
 # Pre-initialize genai client at startup to reduce request latency
 try:
@@ -300,16 +300,17 @@ from fastapi.responses import JSONResponse
 # ══════════════════════════════════════════════════════════════════════════════
 
 class FleetChatRequest(BaseModel):
-    """Simple fleet-style chat request."""
+    """Simple fleet-style chat request with optional tools."""
     message: str
     prompt: Optional[str] = None  # Alias for 'message' (fallback)
     thinking_mode: Optional[str] = "instant"  # Default to fast for fleet calls
+    tools: Optional[List[str]] = None  # Optional: ["google_search", "url_context", "code_execution"]
 
 @app.post("/chat")
 async def fleet_chat(request: FleetChatRequest):
     """
-    Visions Fleet-compatible chat endpoint.
-    Accepts: {"message": "..."}
+    Visions Fleet-compatible chat endpoint with optional tools.
+    Accepts: {"message": "...", "tools": ["google_search"]}
     Returns: {"response": "..."}
     """
     # Use 'message' or fall back to 'prompt'
@@ -325,7 +326,7 @@ async def fleet_chat(request: FleetChatRequest):
     
     try:
         # Use the fast path for fleet calls (low latency)
-        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="us-central1")
+        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
         
         # Select model and thinking_level based on thinking mode (Gemini 3 API)
         if thinking_mode == "thinking":
@@ -344,6 +345,17 @@ async def fleet_chat(request: FleetChatRequest):
             max_tokens = 1024
             thinking_level = "low"  # Minimize latency
         
+        # Build tools list from request
+        active_tools = []
+        if request.tools:
+            for tool_name in request.tools:
+                if tool_name == "google_search":
+                    active_tools.append(types.Tool(google_search=types.GoogleSearch()))
+                elif tool_name == "url_context":
+                    active_tools.append(types.Tool(url_context=types.UrlContext()))
+                elif tool_name == "code_execution":
+                    active_tools.append(types.Tool(code_execution=types.ToolCodeExecution))
+        
         response = client.models.generate_content(
             model=model,
             contents=user_message,
@@ -352,15 +364,25 @@ async def fleet_chat(request: FleetChatRequest):
                 temperature=1.0,  # Gemini 3 recommended - avoid looping issues
                 max_output_tokens=max_tokens,
                 thinking_config=types.ThinkingConfig(thinking_level=thinking_level),
+                tools=active_tools if active_tools else None,
             )
         )
         
-        return {
+        result = {
             "response": response.text,
             "agent": "Bandit",
             "model": model,
             "thinking_mode": thinking_mode
         }
+        
+        # Add tool-specific metadata if tools were used
+        if request.tools:
+            result["tools_used"] = request.tools
+            # Add grounding metadata if available
+            if response.candidates and response.candidates[0].grounding_metadata:
+                result["grounding_metadata"] = True
+        
+        return result
         
     except Exception as e:
         print(f"[FLEET CHAT ERROR] {e}")
@@ -376,6 +398,254 @@ async def fleet_generate(request: FleetChatRequest):
     Alias for /chat - matches KRONOS's POST /generate spec.
     """
     return await fleet_chat(request)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# GEMINI 3 TOOL ENDPOINTS
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Request Models for Tool Endpoints
+class SearchRequest(BaseModel):
+    """Google Search grounding request."""
+    query: str
+    thinking_mode: Optional[str] = "instant"
+
+class UrlRequest(BaseModel):
+    """URL Context analysis request."""
+    prompt: str
+    urls: List[str]
+    
+class CodeRequest(BaseModel):
+    """Code Execution request."""
+    prompt: str
+    
+class ResearchRequest(BaseModel):
+    """Deep Research async request."""
+    topic: str
+    format: Optional[str] = None  # Optional formatting instructions
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GOOGLE SEARCH GROUNDING
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.post("/search")
+async def search_grounded(request: SearchRequest):
+    """
+    Grounded response using Google Search.
+    Returns real-time web search results with citations.
+    """
+    try:
+        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
+        
+        response = client.models.generate_content(
+            model=FAST_MODEL,
+            contents=request.query,
+            config=types.GenerateContentConfig(
+                system_instruction="You are Bandit, an AI with real-time web access. Provide accurate, grounded responses.",
+                temperature=1.0,
+                tools=[types.Tool(google_search=types.GoogleSearch())],
+                thinking_config=types.ThinkingConfig(thinking_level="low" if request.thinking_mode == "instant" else "medium"),
+            )
+        )
+        
+        # Extract grounding metadata
+        grounding_metadata = None
+        if response.candidates and response.candidates[0].grounding_metadata:
+            gm = response.candidates[0].grounding_metadata
+            grounding_metadata = {
+                "web_search_queries": gm.web_search_queries if hasattr(gm, 'web_search_queries') else [],
+                "grounding_chunks": [{"uri": c.web.uri, "title": c.web.title} for c in (gm.grounding_chunks or [])] if hasattr(gm, 'grounding_chunks') else [],
+            }
+        
+        return {
+            "response": response.text,
+            "agent": "Bandit",
+            "model": FAST_MODEL,
+            "tool": "google_search",
+            "grounding_metadata": grounding_metadata
+        }
+        
+    except Exception as e:
+        print(f"[SEARCH ERROR] {e}")
+        return JSONResponse(status_code=500, content={"error": str(e), "agent": "Bandit"})
+
+# ─────────────────────────────────────────────────────────────────────────────
+# URL CONTEXT ANALYSIS
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.post("/analyze-url")
+async def analyze_url(request: UrlRequest):
+    """
+    Analyze content from URLs.
+    Fetches and processes web page content to answer questions.
+    """
+    try:
+        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
+        
+        # Build prompt with URLs
+        url_list = "\n".join([f"- {url}" for url in request.urls])
+        full_prompt = f"{request.prompt}\n\nAnalyze the following URLs:\n{url_list}"
+        
+        response = client.models.generate_content(
+            model=FAST_MODEL,
+            contents=full_prompt,
+            config=types.GenerateContentConfig(
+                system_instruction="You are Bandit, analyzing web content. Extract and synthesize information from the provided URLs.",
+                temperature=1.0,
+                tools=[types.Tool(url_context=types.UrlContext())],
+            )
+        )
+        
+        # Extract URL metadata
+        url_metadata = None
+        if response.candidates and hasattr(response.candidates[0], 'url_context_metadata'):
+            ucm = response.candidates[0].url_context_metadata
+            if ucm and hasattr(ucm, 'url_metadata'):
+                url_metadata = [{"url": m.retrieved_url, "status": m.url_retrieval_status} for m in ucm.url_metadata]
+        
+        return {
+            "response": response.text,
+            "agent": "Bandit",
+            "model": FAST_MODEL,
+            "tool": "url_context",
+            "url_metadata": url_metadata
+        }
+        
+    except Exception as e:
+        print(f"[URL CONTEXT ERROR] {e}")
+        return JSONResponse(status_code=500, content={"error": str(e), "agent": "Bandit"})
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CODE EXECUTION
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.post("/execute-code")
+async def execute_code(request: CodeRequest):
+    """
+    Execute Python code using Gemini's sandbox.
+    The model generates and runs code, returning results.
+    """
+    try:
+        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
+        
+        response = client.models.generate_content(
+            model=FAST_MODEL,
+            contents=request.prompt,
+            config=types.GenerateContentConfig(
+                system_instruction="You are Bandit, a coding assistant. Generate and execute Python code to solve problems.",
+                temperature=1.0,
+                tools=[types.Tool(code_execution=types.ToolCodeExecution)],
+            )
+        )
+        
+        # Extract code parts from response
+        code_parts = []
+        if response.candidates and response.candidates[0].content.parts:
+            for part in response.candidates[0].content.parts:
+                if hasattr(part, 'executable_code') and part.executable_code:
+                    code_parts.append({
+                        "type": "code",
+                        "language": part.executable_code.language if hasattr(part.executable_code, 'language') else "PYTHON",
+                        "content": part.executable_code.code
+                    })
+                elif hasattr(part, 'code_execution_result') and part.code_execution_result:
+                    code_parts.append({
+                        "type": "result",
+                        "outcome": part.code_execution_result.outcome if hasattr(part.code_execution_result, 'outcome') else "OK",
+                        "content": part.code_execution_result.output
+                    })
+                elif hasattr(part, 'text') and part.text:
+                    code_parts.append({
+                        "type": "text",
+                        "content": part.text
+                    })
+        
+        return {
+            "response": response.text,
+            "agent": "Bandit",
+            "model": FAST_MODEL,
+            "tool": "code_execution",
+            "code_parts": code_parts
+        }
+        
+    except Exception as e:
+        print(f"[CODE EXECUTION ERROR] {e}")
+        return JSONResponse(status_code=500, content={"error": str(e), "agent": "Bandit"})
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DEEP RESEARCH AGENT (ASYNC)
+# ─────────────────────────────────────────────────────────────────────────────
+
+DEEP_RESEARCH_AGENT = "deep-research-pro-preview-12-2025"
+
+@app.post("/research")
+async def deep_research(request: ResearchRequest):
+    """
+    Start async deep research task.
+    Returns interaction_id to poll for results.
+    """
+    try:
+        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
+        
+        # Build research prompt with optional formatting
+        research_prompt = request.topic
+        if request.format:
+            research_prompt += f"\n\nFormat the output as follows:\n{request.format}"
+        
+        interaction = client.interactions.create(
+            input=research_prompt,
+            agent=DEEP_RESEARCH_AGENT,
+            background=True,
+            agent_config={
+                "type": "deep-research",
+                "thinking_summaries": "auto"
+            }
+        )
+        
+        return {
+            "interaction_id": interaction.id,
+            "status": "started",
+            "agent": "Bandit",
+            "research_agent": DEEP_RESEARCH_AGENT,
+            "message": "Deep research started. Poll /research/{interaction_id} for results."
+        }
+        
+    except Exception as e:
+        print(f"[DEEP RESEARCH ERROR] {e}")
+        return JSONResponse(status_code=500, content={"error": str(e), "agent": "Bandit"})
+
+@app.get("/research/{interaction_id}")
+async def get_research_status(interaction_id: str):
+    """
+    Poll research task status.
+    Returns completed report when done.
+    """
+    try:
+        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
+        
+        interaction = client.interactions.get(interaction_id)
+        
+        if interaction.status == "completed":
+            return {
+                "status": "completed",
+                "report": interaction.outputs[-1].text if interaction.outputs else None,
+                "agent": "Bandit"
+            }
+        elif interaction.status == "failed":
+            return {
+                "status": "failed",
+                "error": str(interaction.error) if hasattr(interaction, 'error') else "Unknown error",
+                "agent": "Bandit"
+            }
+        else:
+            return {
+                "status": "in_progress",
+                "agent": "Bandit",
+                "message": "Research still in progress. Poll again in 10 seconds."
+            }
+        
+    except Exception as e:
+        print(f"[RESEARCH STATUS ERROR] {e}")
+        return JSONResponse(status_code=500, content={"error": str(e), "agent": "Bandit"})
 
 @app.get("/v1/cache")
 async def get_cached_response(prompt: str = ""):
