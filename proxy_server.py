@@ -91,7 +91,7 @@ app.add_middleware(
 
 # Startup time for uptime tracking
 STARTUP_TIME = time.time()
-VERSION = "3.1.0"  # Full Gemini 3 Tool Suite Edition
+VERSION = "3.2.0"  # K.A.M Fleet Compatible + Embeddings
 
 # Pre-initialize genai client at startup to reduce request latency
 try:
@@ -645,6 +645,68 @@ async def get_research_status(interaction_id: str):
         
     except Exception as e:
         print(f"[RESEARCH STATUS ERROR] {e}")
+        return JSONResponse(status_code=500, content={"error": str(e), "agent": "Bandit"})
+
+# ─────────────────────────────────────────────────────────────────────────────
+# V1 API ALIASES (K.A.M Fleet Compatibility)
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.post("/v1/research")
+async def v1_research(request: ResearchRequest):
+    """Alias for /research - K.A.M fleet compatible."""
+    return await deep_research(request)
+
+@app.get("/v1/research/{interaction_id}/poll")
+async def v1_research_poll(interaction_id: str):
+    """Alias for /research/{id} - K.A.M fleet compatible."""
+    return await get_research_status(interaction_id)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# EMBEDDINGS
+# ─────────────────────────────────────────────────────────────────────────────
+
+class EmbeddingRequest(BaseModel):
+    """Create embeddings request."""
+    input: Union[str, List[str]]
+    model: Optional[str] = "gemini-embedding-001"
+
+@app.post("/v1/embeddings")
+async def create_embeddings(request: EmbeddingRequest):
+    """
+    Create embeddings for text input.
+    Compatible with OpenAI embeddings API format.
+    """
+    try:
+        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
+        
+        # Handle both single string and list of strings
+        texts = request.input if isinstance(request.input, list) else [request.input]
+        
+        embeddings_data = []
+        for i, text in enumerate(texts):
+            result = client.models.embed_content(
+                model=request.model,
+                content=text
+            )
+            embeddings_data.append({
+                "object": "embedding",
+                "index": i,
+                "embedding": result.embedding if hasattr(result, 'embedding') else result.embeddings[0].values
+            })
+        
+        return {
+            "object": "list",
+            "data": embeddings_data,
+            "model": request.model,
+            "agent": "Bandit",
+            "usage": {
+                "prompt_tokens": sum(len(t.split()) for t in texts),
+                "total_tokens": sum(len(t.split()) for t in texts)
+            }
+        }
+        
+    except Exception as e:
+        print(f"[EMBEDDINGS ERROR] {e}")
         return JSONResponse(status_code=500, content={"error": str(e), "agent": "Bandit"})
 
 @app.get("/v1/cache")
