@@ -107,13 +107,23 @@ except Exception as e:
 AUTH_TOKEN_CACHE = {"token": None, "expires_at": 0}
 AUTH_TOKEN_TTL = 55 * 60  # 55 minutes
 
-# Health Check Endpoint
+# Health Check Endpoint - Visions Fleet Compliant
 @app.get("/health")
 async def health_check():
-    """Health check endpoint for monitoring and diagnostics."""
+    """
+    Health check endpoint for Visions Fleet discovery.
+    Returns the exact fleet-expected format.
+    """
+    return {
+        "status": "online",
+        "agent": "Bandit"
+    }
+
+@app.get("/health/detailed")
+async def health_detailed():
+    """Detailed health check for diagnostics (not fleet-required)."""
     uptime_seconds = int(time.time() - STARTUP_TIME)
     
-    # Test auth status
     auth_status = "unknown"
     try:
         token = get_auth_token()
@@ -122,13 +132,19 @@ async def health_check():
         auth_status = f"error: {str(e)[:50]}"
     
     return {
-        "status": "healthy",
+        "status": "online",
+        "agent": "Bandit",
         "version": VERSION,
         "uptime_seconds": uptime_seconds,
         "auth_status": auth_status,
         "engine_id": DEFAULT_ENGINE_ID,
         "location": DEFAULT_LOCATION,
-        "project": DEFAULT_PROJECT
+        "project": DEFAULT_PROJECT,
+        "models": {
+            "instant": FAST_MODEL,
+            "auto": FULL_MODEL,
+            "thinking": DEEP_THINK_MODEL
+        }
     }
 
 @app.get("/")
@@ -278,6 +294,84 @@ async def a2a_handle_ask(params: dict) -> dict:
 
 # Import for JSONResponse
 from fastapi.responses import JSONResponse
+
+# ══════════════════════════════════════════════════════════════════════════════
+# VISIONS FLEET CHAT ENDPOINT
+# ══════════════════════════════════════════════════════════════════════════════
+
+class FleetChatRequest(BaseModel):
+    """Simple fleet-style chat request."""
+    message: str
+    prompt: Optional[str] = None  # Alias for 'message' (fallback)
+    thinking_mode: Optional[str] = "instant"  # Default to fast for fleet calls
+
+@app.post("/chat")
+async def fleet_chat(request: FleetChatRequest):
+    """
+    Visions Fleet-compatible chat endpoint.
+    Accepts: {"message": "..."}
+    Returns: {"response": "..."}
+    """
+    # Use 'message' or fall back to 'prompt'
+    user_message = request.message or request.prompt
+    
+    if not user_message:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Missing 'message' or 'prompt' field"}
+        )
+    
+    thinking_mode = request.thinking_mode or "instant"
+    
+    try:
+        # Use the fast path for fleet calls (low latency)
+        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="us-central1")
+        
+        # Select model based on thinking mode
+        if thinking_mode == "thinking":
+            model = DEEP_THINK_MODEL
+            sys_prompt = "You are Bandit, an advanced AI with deep reasoning. Take time to think through problems."
+            max_tokens = 4096
+        elif thinking_mode == "auto":
+            model = FULL_MODEL
+            sys_prompt = "You are Bandit, a helpful AI assistant."
+            max_tokens = 2048
+        else:  # instant
+            model = FAST_MODEL
+            sys_prompt = "You are Bandit, a fast AI assistant. Be concise."
+            max_tokens = 1024
+        
+        response = client.models.generate_content(
+            model=model,
+            contents=user_message,
+            config=types.GenerateContentConfig(
+                system_instruction=sys_prompt,
+                temperature=0.7,
+                max_output_tokens=max_tokens,
+            )
+        )
+        
+        return {
+            "response": response.text,
+            "agent": "Bandit",
+            "model": model,
+            "thinking_mode": thinking_mode
+        }
+        
+    except Exception as e:
+        print(f"[FLEET CHAT ERROR] {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e), "agent": "Bandit"}
+        )
+
+@app.post("/generate")
+async def fleet_generate(request: FleetChatRequest):
+    """
+    KRONOS Fleet-compatible generate endpoint.
+    Alias for /chat - matches KRONOS's POST /generate spec.
+    """
+    return await fleet_chat(request)
 
 @app.get("/v1/cache")
 async def get_cached_response(prompt: str = ""):
