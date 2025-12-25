@@ -91,13 +91,13 @@ app.add_middleware(
 
 # Startup time for uptime tracking
 STARTUP_TIME = time.time()
-VERSION = "2.0.0"  # God-Level Edition
+VERSION = "3.0.0"  # Gemini 3 + KRONOS Fleet Edition
 
 # Pre-initialize genai client at startup to reduce request latency
 try:
     from scripts.bandit_cli import DEFAULT_PROJECT
-    GENAI_CLIENT = genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="us-central1")
-    print(f"[INIT] Pre-initialized genai client for project: {DEFAULT_PROJECT}")
+    GENAI_CLIENT = genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
+    print(f"[INIT] Pre-initialized genai client for project: {DEFAULT_PROJECT} (global endpoint)")
     print(f"[INIT] God-Level domains loaded: {list(GOD_LEVEL_DOMAINS.keys())}")
 except Exception as e:
     GENAI_CLIENT = None
@@ -327,27 +327,31 @@ async def fleet_chat(request: FleetChatRequest):
         # Use the fast path for fleet calls (low latency)
         client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="us-central1")
         
-        # Select model based on thinking mode
+        # Select model and thinking_level based on thinking mode (Gemini 3 API)
         if thinking_mode == "thinking":
             model = DEEP_THINK_MODEL
             sys_prompt = "You are Bandit, an advanced AI with deep reasoning. Take time to think through problems."
             max_tokens = 4096
+            thinking_level = "high"  # Maximum reasoning depth
         elif thinking_mode == "auto":
             model = FULL_MODEL
             sys_prompt = "You are Bandit, a helpful AI assistant."
             max_tokens = 2048
+            thinking_level = "medium"  # Balanced thinking (Flash only)
         else:  # instant
             model = FAST_MODEL
             sys_prompt = "You are Bandit, a fast AI assistant. Be concise."
             max_tokens = 1024
+            thinking_level = "low"  # Minimize latency
         
         response = client.models.generate_content(
             model=model,
             contents=user_message,
             config=types.GenerateContentConfig(
                 system_instruction=sys_prompt,
-                temperature=0.7,
+                temperature=1.0,  # Gemini 3 recommended - avoid looping issues
                 max_output_tokens=max_tokens,
+                thinking_config=types.ThinkingConfig(thinking_level=thinking_level),
             )
         )
         
@@ -608,7 +612,7 @@ async def chat_completions(request: ChatCompletionRequest):
         print(f"[AUTO] Detected deep thinking request in prompt, upgrading to 'thinking' mode")
         thinking_mode = "thinking"
     
-    # FAST PATH: Use gemini-2.5-flash-lite directly (bypasses Reasoning Engine routing)
+    # FAST PATH: Use gemini-3-flash-preview directly (bypasses Reasoning Engine routing)
     if thinking_mode == "instant":
         try:
             print(f"[FAST PATH] Using {FAST_MODEL}...")
@@ -619,8 +623,9 @@ async def chat_completions(request: ChatCompletionRequest):
                 contents=gemini_contents,
                 config=types.GenerateContentConfig(
                     system_instruction="You are Bandit, a fast AI assistant. Be concise.",
-                    temperature=0.7,
+                    temperature=1.0,  # Gemini 3 recommended
                     max_output_tokens=1024,
+                    thinking_config=types.ThinkingConfig(thinking_level="low"),
                 )
             )
             
@@ -660,8 +665,9 @@ Provide detailed, well-reasoned responses. You're in deep thinking mode."""
                 contents=gemini_contents,
                 config=types.GenerateContentConfig(
                     system_instruction=system_instruction,
-                    temperature=0.7,
+                    temperature=1.0,  # Gemini 3 recommended
                     max_output_tokens=8192,
+                    thinking_config=types.ThinkingConfig(thinking_level="high"),
                 )
             )
             
