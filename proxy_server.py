@@ -25,10 +25,10 @@ BACKGROUND_CACHE: OrderedDict = OrderedDict()
 CACHE_MAX_SIZE = 100
 CACHE_LOCK = threading.Lock()
 
-# Model tiers for different response modes
-FAST_MODEL = "gemini-2.5-flash-lite"        # Instant mode - fastest, low latency
-FULL_MODEL = "gemini-2.5-pro"               # Auto mode - balanced
-DEEP_THINK_MODEL = "gemini-3-pro-preview"   # Deep think - maximum reasoning
+# Model tiers for different response modes (Gemini 3 Family)
+FAST_MODEL = "gemini-3-flash-preview"        # Instant mode - frontier intelligence, 3x faster
+FULL_MODEL = "gemini-3-flash-preview"        # Auto mode - balanced (Flash handles most tasks)
+DEEP_THINK_MODEL = "gemini-3-pro-preview"    # Deep think - maximum reasoning
 
 # Natural language patterns that trigger deep thinking
 DEEP_THINK_PATTERNS = [
