@@ -24,7 +24,7 @@ try:
     from scripts.bandit_cli import get_engine_resource_name, DEFAULT_PROJECT, DEFAULT_LOCATION, DEFAULT_ENGINE_ID
 except ImportError:
     # Fallback if bandit_cli not available
-    DEFAULT_PROJECT = os.getenv("GOOGLE_CLOUD_PROJECT", os.getenv("GCP_PROJECT", "metal-cable-478318-g8"))
+    DEFAULT_PROJECT = os.getenv("GOOGLE_CLOUD_PROJECT", os.getenv("GCP_PROJECT", "project-5f169828-6f8d-450b-923"))
     DEFAULT_LOCATION = os.getenv("DEFAULT_LOCATION", "us-central1")
     DEFAULT_ENGINE_ID = os.getenv("DEFAULT_ENGINE_ID", "3723065118905335808")
     def get_engine_resource_name(project: str, location: str, engine_id: str) -> str:

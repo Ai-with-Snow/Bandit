@@ -46,7 +46,7 @@ lmsify_theme = Theme({
 console = Console(theme=lmsify_theme)
 
 # Read from environment (Cloud Run sets GOOGLE_CLOUD_PROJECT automatically)
-DEFAULT_PROJECT = os.getenv("GOOGLE_CLOUD_PROJECT", os.getenv("GCP_PROJECT", "metal-cable-478318-g8"))
+DEFAULT_PROJECT = os.getenv("GOOGLE_CLOUD_PROJECT", os.getenv("GCP_PROJECT", "project-5f169828-6f8d-450b-923"))
 DEFAULT_LOCATION = "us-central1"
 # Base64 image transfer (no GCS permissions needed)
 # Updated: DAV1D v3 - Fixed spinner + Flash-Lite greetings (2025-12-10)
