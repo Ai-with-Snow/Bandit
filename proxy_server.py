@@ -38,7 +38,7 @@ CACHE_LOCK = threading.Lock()
 # Model tiers for different response modes (Gemini 3 Family)
 FAST_MODEL = "gemini-3-flash-preview"        # Instant mode - frontier intelligence, 3x faster
 FULL_MODEL = "gemini-3-flash-preview"        # Auto mode - balanced (Flash handles most tasks)
-DEEP_THINK_MODEL = "gemini-3-pro-preview"    # Deep think - maximum reasoning
+DEEP_THINK_MODEL = "gemini-3-pro-preview-11-2025"    # Deep think - maximum reasoning
 
 # Natural language patterns that trigger deep thinking
 DEEP_THINK_PATTERNS = [
@@ -181,8 +181,8 @@ BANDIT_SKILLS = [
     {"name": "multimodal", "description": "Image understanding via Gemini Vision"},
     {"name": "search", "description": "Web-grounded search via Google Search"},
     {"name": "code", "description": "Code generation, explanation, and debugging"},
-    {"name": "instant", "description": "Fast responses using gemini-2.5-flash-lite"},
-    {"name": "thinking", "description": "Deep thinking mode using gemini-3-pro-preview"},
+    {"name": "instant", "description": "Fast responses using gemini-3-flash-preview"},
+    {"name": "thinking", "description": "Deep thinking mode using gemini-3-pro-preview-11-2025"},
 ]
 
 @app.get("/.well-known/agent.json")
@@ -718,6 +718,94 @@ async def create_embeddings(request: EmbeddingRequest):
     except Exception as e:
         print(f"[EMBEDDINGS ERROR] {e}")
         return JSONResponse(status_code=500, content={"error": str(e), "agent": "Bandit"})
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TEXT-TO-SPEECH (TTS) - Bandit's Voice
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Bandit's default voice - Charon (Informative, knowledgeable male voice)
+BANDIT_VOICE = "Charon"
+TTS_MODEL = "gemini-2.5-flash-lite-preview-tts"  # Cheapest & fastest TTS
+
+class TTSRequest(BaseModel):
+    """Text-to-Speech request."""
+    text: str
+    voice: Optional[str] = BANDIT_VOICE  # Default: Charon
+    model: Optional[str] = TTS_MODEL
+    style: Optional[str] = None  # Natural language style prompt
+
+@app.post("/tts")
+async def text_to_speech(request: TTSRequest):
+    """
+    Generate speech from text using Bandit's voice.
+    Returns base64-encoded audio.
+    """
+    try:
+        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
+        
+        # Build the prompt with style if provided
+        speech_text = request.text
+        if request.style:
+            speech_text = f"[{request.style}] {speech_text}"
+        
+        # Generate speech using Gemini TTS
+        response = client.models.generate_content(
+            model=request.model,
+            contents=speech_text,
+            config=types.GenerateContentConfig(
+                speech_config=types.SpeechConfig(
+                    voice_config=types.VoiceConfig(
+                        prebuilt_voice_config=types.PrebuiltVoiceConfig(
+                            voice_name=request.voice
+                        )
+                    )
+                ),
+                response_modalities=["AUDIO"],
+            )
+        )
+        
+        # Extract audio data
+        audio_data = None
+        if response.candidates and response.candidates[0].content.parts:
+            for part in response.candidates[0].content.parts:
+                if hasattr(part, 'inline_data') and part.inline_data:
+                    audio_data = part.inline_data.data
+                    break
+        
+        if audio_data:
+            import base64
+            return {
+                "audio": base64.b64encode(audio_data).decode('utf-8'),
+                "voice": request.voice,
+                "model": request.model,
+                "agent": "Bandit",
+                "format": "audio/wav"
+            }
+        else:
+            return JSONResponse(status_code=500, content={"error": "No audio generated", "agent": "Bandit"})
+        
+    except Exception as e:
+        print(f"[TTS ERROR] {e}")
+        return JSONResponse(status_code=500, content={"error": str(e), "agent": "Bandit"})
+
+@app.get("/tts/voices")
+async def list_voices():
+    """List available TTS voices."""
+    return {
+        "default": BANDIT_VOICE,
+        "female": [
+            "Zephyr", "Kore", "Leda", "Aoede", "Callirrhoe", "Autonoe", 
+            "Erinome", "Laomedeia", "Pulcherrima", "Vindemiatrix",
+            "Achernar", "Despina", "Gacrux", "Sulafat"
+        ],
+        "male": [
+            "Puck", "Charon", "Fenrir", "Orus", "Enceladus", "Iapetus",
+            "Umbriel", "Algieba", "Algenib", "Rasalgethi", "Alnilam",
+            "Schedar", "Achird", "Zubenelgenubi", "Sadachbia", "Sadaltager"
+        ],
+        "agent": "Bandit"
+    }
+
 
 @app.get("/v1/cache")
 async def get_cached_response(prompt: str = ""):
