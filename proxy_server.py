@@ -101,7 +101,7 @@ app.add_middleware(
 
 # Startup time for uptime tracking
 STARTUP_TIME = time.time()
-VERSION = "3.2.0"  # K.A.M Fleet Compatible + Embeddings
+VERSION = "3.0.6"  # Bandit Fleet Compatible + Embeddings
 
 # Pre-initialize genai client at startup to reduce request latency
 try:
@@ -181,8 +181,8 @@ BANDIT_SKILLS = [
     {"name": "multimodal", "description": "Image understanding via Gemini Vision"},
     {"name": "search", "description": "Web-grounded search via Google Search"},
     {"name": "code", "description": "Code generation, explanation, and debugging"},
-    {"name": "instant", "description": "Fast responses using gemini-3-flash-preview"},
-    {"name": "thinking", "description": "Deep thinking mode using gemini-3-pro-preview-11-2025"},
+    {"name": "instant", "description": "Fast responses using Bandit Instant (gemini-3-flash-preview)"},
+    {"name": "thinking", "description": "Deep thinking mode using Bandit Deep (gemini-3-pro-preview-11-2025)"},
 ]
 
 @app.get("/.well-known/agent.json")
