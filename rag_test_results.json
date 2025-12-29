@@ -1,0 +1,189 @@
+{
+  "timestamp": "2025-12-28T04:09:35.604359",
+  "passed": 6,
+  "failed": 14,
+  "success_rate": "30%",
+  "config_issues": [],
+  "results": [
+    {
+      "index": 1,
+      "question": "What are the domes in the Irie Igloo Discord server?",
+      "category": "discord",
+      "passed": false,
+      "response": "[bandit-irie-igloo-server-map.md] # Irie Igloo Server Map\n[irie_igloo_discord.md] # Irie Igloo \u2014 Discord Server Blueprint\r\n[Streamer focus 2b18cd6df7fa8144bc2cd42ff35b0b17.md] Before we lock in direction, let\u2019s clarify what phase you\u2019re in so I can build you a professional, monetizable setup plan.\n[bandit-irie-igloo-copy.md] # Irie Igloo Copy & Pinned Messages\n[streamer-focus.md] - **Primary Promise:** Create an energetic sanctuary (The Nebula / Irie Igloo) where viewers decompress, breathe, and navigate life, relationships, and creativity.",
+      "latency_ms": 9266,
+      "method": "gcs"
+    },
+    {
+      "index": 2,
+      "question": "What is The Melt Spot in the Irie Igloo?",
+      "category": "discord",
+      "passed": true,
+      "response": "[bandit-irie-igloo-copy.md] # Irie Igloo Copy & Pinned Messages\n[bandit-irie-igloo-server-map.md] # Irie Igloo Server Map\n[irie_igloo_discord.md] # Irie Igloo \u2014 Discord Server Blueprint\n[Streamer focus 2b18cd6df7fa8144bc2cd42ff35b0b17.md] Before we lock in direction, let\u2019s clarify what phase you\u2019re in so I can build you a professional, monetizable setup plan.\n[bandit-irie-igloo-broadcast.md]   - `\ud83c\udfa7 vibe-stream` \u2014 music-focused voice/text hybrid for lo-fi, ambient, or Irie playlists.",
+      "latency_ms": 697,
+      "method": "local"
+    },
+    {
+      "index": 3,
+      "question": "How do you set up FredBoat for music in Discord?",
+      "category": "discord",
+      "passed": true,
+      "response": "[bandit-irie-igloo-broadcast.md] # Celestial Radio & Music Bot Playbook\n[bandit-irie-igloo-server-map.md] | \ud83c\udfad **Snow Zone** | Events, somatic/sensual updates, playlist culture. | `#bound-and-beyond-\u26d3\ufe0f` event updates.<br>`#velvet-evenings-\ud83c\udf0c` after-work retreat chatter.<br>`#celestial-vibes-\ud83c\udfb6` music + sensu\n[irie_igloo_discord.md] | #celestial-vibes-\ud83c\udfb6 | Playlists, music shares |",
+      "latency_ms": 599,
+      "method": "local"
+    },
+    {
+      "index": 4,
+      "question": "What roles exist in the Irie Igloo server?",
+      "category": "discord",
+      "passed": false,
+      "response": "[bandit-irie-igloo-server-map.md] # Irie Igloo Server Map\n[bandit-irie-igloo-copy.md] # Irie Igloo Copy & Pinned Messages\n[irie_igloo_discord.md] # Irie Igloo \u2014 Discord Server Blueprint\r\n[Streamer focus 2b18cd6df7fa8144bc2cd42ff35b0b17.md] Before we lock in direction, let\u2019s clarify what phase you\u2019re in so I can build you a professional, monetizable setup plan.\n[meeting_templates.md] ## Irie Igloo Meeting Agenda Template\r",
+      "latency_ms": 6681,
+      "method": "gcs"
+    },
+    {
+      "index": 5,
+      "question": "What is Velvet Hours and how long is it?",
+      "category": "pause",
+      "passed": true,
+      "response": "[kevin-hart-study-guide.md] **Exam Q:** Explain how Kevin\u2019s parents shaped his \u201cfinish what you start\u201d philosophy.\n[business_scaling_strategy.md]  \u251c Workshops                   \u251c Velvet Hours               \u251c Manifest A Vibe\n[bandit-feelin-it-mr-krabz.md] - **Time:** 1:00\u20134:00 PM (venue booked for full 3 hours, includes setup + breakdown).\n[bandit-pleasher-workshop.md] - **Duration:** 2 hours baseline; expandable into series.\n[bandit-velvet-evenings.md] # Velvet Evenings & Velvet Hours Dossier",
+      "latency_ms": 575,
+      "method": "local"
+    },
+    {
+      "index": 6,
+      "question": "Describe The Art of PleasHer workshop",
+      "category": "pause",
+      "passed": true,
+      "response": "[bandit-pause-class-catalog.md] # P.A.U.S.E. Classes & Workshop Pillars\n[bandit-pleasher-workshop.md] # The Art of PleasHer \u2014 Facilitator Notes\n[bandit_12_year_gemini_mastery_curriculum.md] - **Project 2D**: Image accessibility describer\n[intake.md] | 2025-11-20-pleasher-kit | Convert PleasHer outline into facilitator deck + workbook | Ice Wire | 2025-11-25 | Queued | `HQ/community/bandit-pleasher-workshop.md` |\n[lmsify_outreach_workshops.md] # LMSIFY Outreach & Workshop Materials",
+      "latency_ms": 576,
+      "method": "local"
+    },
+    {
+      "index": 7,
+      "question": "What is Feelin It Mr Krabz about?",
+      "category": "pause",
+      "passed": false,
+      "response": "[bandit-feelin-it-mr-krabz.md] # Feelin\u2019 It Mr. Krabz \u2014 Event Packet\n[bandit-pause-portal-emails.md] Source: Chat instructions for Feelin\u2019 It Mr. Krabz activation + vetting workflow.\n[mentorship-kevin-hart-lessons.md] - **Finish lines over experiments:** 13-year grind before \"the moment\"; warns against quitting at year two. Reinforces P.A.U.S.E. mantra to complete what we start (Velvet assets, PleasHer kit, portal \n[million-dollar-upscale-intake.md] Guiding principles from Kevin Hart playbook: finish what we start, treat curiosity as an asset, own the room, and build a gateway skill before expanding.\n[lmsify_booking_templates.md] Your session is locked in. Here's what to know:\r",
+      "latency_ms": 7120,
+      "method": "gcs"
+    },
+    {
+      "index": 8,
+      "question": "What's in the P.A.U.S.E. vetting form disclaimer?",
+      "category": "pause",
+      "passed": false,
+      "response": "[bandit-pause-portal-emails.md] # P.A.U.S.E. Portal Email Templates\n[bandit-pause-portal-vetting.md] # P.A.U.S.E. Portal Vetting Form Notes\n[million-dollar-upscale-intake.md] - **Top Revenue Streams:** Sensory Sessions (The Celestial Experience), P.A.U.S.E. Portal workshop events, Virtual content subscriptions (OnlyFans).\n[meeting_templates.md] - Quick P.A.U.S.E. breath or intention share\r\n[pause_workshops_catalog.md] # P.A.U.S.E. Classes & Workshops Catalog\r",
+      "latency_ms": 6511,
+      "method": "gcs"
+    },
+    {
+      "index": 9,
+      "question": "Explain the LMSIFY LLC structure",
+      "category": "business",
+      "passed": false,
+      "response": "[bandit_master_training_reference.md] **Organization:** LMSIFY\r\n[bandit_training_session_20251206.md] - HQ directory structure\r\n[gemini_api_reference.md] The Gemini API enables interaction with Gemini models through standard REST, streaming (SSE), and real-time (WebSocket) endpoints. Bandit primarily uses the **Vertex AI Python SDK** which wraps these \n[Nutrition Nebula focus 2b18cd6df7fa81ae9cb5d1d58732dbf8.md] - **Nutrition Nebula** is your culinary healing branch under LMSIFY.\n[Streamer focus 2b18cd6df7fa8144bc2cd42ff35b0b17.md] Here\u2019s how we\u2019ll structure your **Celestial Goddexx Snow Streaming Ecosystem** \ud83d\udc47\ud83c\udffd",
+      "latency_ms": 6092,
+      "method": "gcs"
+    },
+    {
+      "index": 10,
+      "question": "What is an SBA 7(a) loan and how can Snow use it?",
+      "category": "business",
+      "passed": true,
+      "response": "[business_scaling_strategy.md]  \ud83e\uddd8 P.A.U.S.E. Division        \ud83e\udd8a SnowDayKokoa               \ud83d\udc8e Life Tokens Shop\n[alpha_to_bravo_ux_notes.md] ## \u2705 WHAT'S WORKING WELL\n[bandit-feelin-it-mr-krabz.md] - **Host:** Goddexx Snow (Bandit).\n[bandit-irie-igloo-copy.md] \ud83c\udfad Snow Zone \u2013 events, somatic play & celestial vibes\n[bandit-irie-igloo-server-map.md] | \ud83c\udfad **Snow Zone** | Events, somatic/sensual updates, playlist culture. | `#bound-and-beyond-\u26d3\ufe0f` event updates.<br>`#velvet-evenings-\ud83c\udf0c` after-work retreat chatter.<br>`#celestial-vibes-\ud83c\udfb6` music + sensu",
+      "latency_ms": 621,
+      "method": "local"
+    },
+    {
+      "index": 11,
+      "question": "What business marketplaces can I use to buy businesses?",
+      "category": "business",
+      "passed": false,
+      "response": "[business_scaling_strategy.md] # LMSIFY Business Structure & Scaling Strategy\r\n[kevin-hart-study-guide.md] **Exam Q:** Explain how Kevin\u2019s parents shaped his \u201cfinish what you start\u201d philosophy.\n[mentorship-kevin-hart-lessons.md] - **Finish lines over experiments:** 13-year grind before \"the moment\"; warns against quitting at year two. Reinforces P.A.U.S.E. mantra to complete what we start (Velvet assets, PleasHer kit, portal \n[million-dollar-upscale-intake.md] Source: \u201cAct as a business strategist\u201d chat + Kevin Hart mentorship notes (https://www.youtube.com/watch?v=5sCGZAcXKWg).\n[business_credit_playbook.md] # LMSIFY Business Credit Playbook\r",
+      "latency_ms": 6856,
+      "method": "gcs"
+    },
+    {
+      "index": 12,
+      "question": "What are the event monetization streams for SnowDayKokoa?",
+      "category": "business",
+      "passed": false,
+      "response": "[Streamer focus 2b18cd6df7fa8144bc2cd42ff35b0b17.md] Before we lock in direction, let\u2019s clarify what phase you\u2019re in so I can build you a professional, monetizable setup plan.\n[million-dollar-upscale-intake.md] - **Top Revenue Streams:** Sensory Sessions (The Celestial Experience), P.A.U.S.E. Portal workshop events, Virtual content subscriptions (OnlyFans).\n[business_scaling_strategy.md] | P.A.U.S.E. Portal Workshops | Event-based | Digital curriculum + certification |\r\n[streaming_content_strategy.md] | Mindful Gaming | Chill streams, solo introspection |\r\n[alpha_to_bravo_stress_test.md] ### \u2705 What's Working:\r",
+      "latency_ms": 6626,
+      "method": "gcs"
+    },
+    {
+      "index": 13,
+      "question": "What are some T-shirt slogans for lifestyle events?",
+      "category": "merch",
+      "passed": false,
+      "response": "[bandit-irie-igloo-copy.md] \ud83d\udecd\ufe0f Frosted Market \u2013 coping tools, lifestyle drops & merpz confessional\n[merch_catalog.md] # LMSIFY Merch Catalog \u2014 T-Shirt & Life Token Designs\r\n[Nutrition Nebula focus 2b18cd6df7fa81ae9cb5d1d58732dbf8.md]     - Tote bags, aprons, enamel pins, t-shirts: each fox design can represent a different **flavor/series** of Nutrition Nebula.\n[Streamer focus 2b18cd6df7fa8144bc2cd42ff35b0b17.md] Before we lock in direction, let\u2019s clarify what phase you\u2019re in so I can build you a professional, monetizable setup plan.\n[alpha_to_bravo_stress_test.md] ### \u2705 What's Working:\r",
+      "latency_ms": 8756,
+      "method": "gcs"
+    },
+    {
+      "index": 14,
+      "question": "What is the definition of 'Merpz'?",
+      "category": "merch",
+      "passed": false,
+      "response": "[kevin-hart-study-guide.md] **Exam Q:** Explain how Kevin\u2019s parents shaped his \u201cfinish what you start\u201d philosophy.\n[gemini3_training_manual.md] \u2502   \u251c\u2500\u2500 agents.py                   # Agent definitions\r\n[pause_workshops_catalog.md] 2. **Connection to P.A.U.S.E.** \u2014 What draws them, previous experience\r",
+      "latency_ms": 7602,
+      "method": "gcs"
+    },
+    {
+      "index": 15,
+      "question": "What typography styles work for Cricut designs?",
+      "category": "merch",
+      "passed": false,
+      "response": "[bandit_master_training_reference.md] > **\"Intake directives, translate them into actionable briefs, and coordinate cross-agent work with calm authority.\"**\r\n[tax_filing_guide.md] 1. **Catch up on personal taxes** \u2014 Start with most recent year, work backwards\r\n[merch_catalog.md] > **Typography, slogans, and Cricut-ready designs**\r\n[Streamer focus 2b18cd6df7fa8144bc2cd42ff35b0b17.md] Before we lock in direction, let\u2019s clarify what phase you\u2019re in so I can build you a professional, monetizable setup plan.\n[alpha_to_bravo_stress_test.md] ### \u2705 What's Working:\r",
+      "latency_ms": 6915,
+      "method": "gcs"
+    },
+    {
+      "index": 16,
+      "question": "What is Earth is Highlarious?",
+      "category": "merch",
+      "passed": false,
+      "response": "[bandit-irie-igloo-copy.md] This is the Igloo\u2019s central hearth\u2014where the ice melts and the vibes flow.\n[bandit-irie-igloo-server-map.md] | \ud83c\udf72 **Nutrition Nebula Kitchen** | Food-is-frequency rituals and gut health talk. | `#whatsonyourplate-\ud83c\udf7d\ufe0f` meal shares.<br>`#nebula-recipes-\ud83c\udf00` intention-based recipes.<br>`#gut-check-\ud83c\udf3f` wellness + dig\n[irie_igloo_discord.md] | #whatsonyourplate-\ud83c\udf7d\ufe0f | Meal shares, food pics |\r\n[business_scaling_strategy.md]  \u251c Practitioner Program        \u251c Celestial Goddexx          \u251c Earth is Highlarious\r\n[bandit_core_memory.md] - Year 6: Thesis Stone (Earth) \u2014 Complex research\r",
+      "latency_ms": 7631,
+      "method": "gcs"
+    },
+    {
+      "index": 17,
+      "question": "What platforms should Celestial Goddexx Snow stream on?",
+      "category": "streaming",
+      "passed": false,
+      "response": "[Streamer focus 2b18cd6df7fa8144bc2cd42ff35b0b17.md] # Streamer focus\n[business_scaling_strategy.md]  \ud83e\uddd8 P.A.U.S.E. Division        \ud83e\udd8a SnowDayKokoa               \ud83d\udc8e Life Tokens Shop\r\n[gemini3_training_manual.md] - **Owner:** Goddexx Snow\r\n[streaming_content_strategy.md] # Celestial Goddexx Snow \u2014 Streaming & Content Strategy\r\n[million-dollar-upscale-intake.md] # Million-Dollar Snowverse Blueprint",
+      "latency_ms": 6944,
+      "method": "gcs"
+    },
+    {
+      "index": 18,
+      "question": "What is the Celestial Experience service menu?",
+      "category": "streaming",
+      "passed": false,
+      "response": "[bandit_master_training_reference.md]         'describe', 'what is', 'how does'\r\n[lmsify_business_readme.md] **Core promise:** Consent-centered experiences that help people return to the body, regulate the nervous system, and reconnect to pleasure, presence, and self-trust.\r\n[Flyer visual focus 2b18cd6df7fa813099badba6fcae1062.md] 3. **Vibe & aesthetic** \u2014 edgy, sensual velvet, celestial, afrocentric, corporate-clean, playful, etc.\n[Nutrition Nebula focus 2b18cd6df7fa81ae9cb5d1d58732dbf8.md] - Purpose: Celestial, healing-focused food experiences that nourish **mind, body, and spirit**.\n[bandit-irie-igloo-server-map.md] | \ud83c\udf10 **Welcome Dome** | First-touch experience, orientation, server voice. | `#welcome-\u2744\ufe0f` \u201cVibe check, rules, how to flow.\u201d<br>`#announcements-\ud83d\udce2` \u201cMod-only drops + news.\u201d<br>`#introductions-\ud83d\udc4b\ud83c\udffe` \u201cPromp",
+      "latency_ms": 6651,
+      "method": "gcs"
+    },
+    {
+      "index": 19,
+      "question": "What are Snow's streaming content pillars?",
+      "category": "streaming",
+      "passed": false,
+      "response": "[bandit_12_year_gemini_mastery_curriculum.md] - Understand what generative AI is and how it works\r\n[bandit_core_memory.md] - `HQ/memory/` directory contents\r\n[bandit_curriculum_study_guide.md] *What Bandit learns to become a Gemini API beginner*\r\n[bandit_master_training_reference.md] ## \ud83d\udcd6 TABLE OF CONTENTS\r\n[bandit_system_prompt.md] *Snow's AI Consigliere - Operational Configuration*\r",
+      "latency_ms": 6949,
+      "method": "gcs"
+    },
+    {
+      "index": 20,
+      "question": "Describe the Nutrition Nebula concept",
+      "category": "nutrition",
+      "passed": true,
+      "response": "[bandit-pause-class-catalog.md] - **Cultural Nourishment & Afrocentric Wellness** \u2014 food rituals (Nutrition Nebula), Rastafarian/Caribbean/Black healing traditions, storytelling, sound, and drumming.\n[nutrition_nebula.md] # Nutrition Nebula \u2014 Brand & Content Guide\n[Nutrition Nebula focus 2b18cd6df7fa81ae9cb5d1d58732dbf8.md] # Nutrition Nebula focus\n[Streamer focus 2b18cd6df7fa8144bc2cd42ff35b0b17.md] 3. **Stream Type Mix** \u2014 What\u2019s your content rotation looking like: gaming, ASMR, somatic chats, lifestyle streams, or celestial cooking segments from the Nutrition Nebula?\n[bandit-irie-igloo-copy.md] \ud83c\udf72 Nutrition Nebula Kitchen \u2013 recipes, food is frequency, & gut health",
+      "latency_ms": 911,
+      "method": "local"
+    }
+  ]
+}

@@ -1,62 +1,63 @@
 import asyncio
-import time
 import os
-import sys
-from pathlib import Path
+import time
+from typing import List
+from voice_thinking import BanditVoiceEngine
 
-# Add project root to path
-sys.path.append(str(Path(__file__).parent.parent))
+async def run_stress_test():
+    """
+    Automated 10-turn stress test for core latency benchmarking.
+    Excludes LIFX and Optimum tests to focus on routing and reasoning speed.
+    """
+    test_queries = [
+        "What is the current time in Tokyo?",
+        "Explain quantum entanglement in one sentence.",
+        "Who wrote the book 'Meditations'?",
+        "Translate 'I love the stars' to Japanese.",
+        "What is the capital of France?",
+        "How many legs does a spider have?",
+        "Who is the current CEO of Google?",
+        "What is the weather like in New York? (Simulated search)",
+        "Tell me a short joke.",
+        "What is the square root of 144?"
+    ]
 
-from scripts.voice_thinking import BanditVoiceEngine, AudioConfig, SessionStats
-
-class MockMic:
-    def __init__(self): self.connected = False
-    def get_current_rms(self): return 100
-    def listen_until_silence(self, *args): return b"mock_audio"
-    def close(self): pass
-
-async def run_stress_test(turns=50):
-    print(f"🚀 Starting Autonomous Stress Test ({turns} turns)...")
+    print("🚀 Starting Latency Stress Test (10 Turns)...")
+    print("-" * 40)
     
-    # Initialize Engine Components
-    try:
-        engine = BanditVoiceEngine()
-        # Mock services that depend on hardware
-        engine.mic = MockMic()
-        engine.transcriber.transcribe = lambda x: "Tell me something interesting about the future."
-        
-        # Test 15-minute window or turn count
-        start_time = time.time()
-        
-        for i in range(1, turns + 1):
-            print(f"🔄 Turn {i}/{turns}...")
+    engine = BanditVoiceEngine()
+    latencies = []
+    
+    # We run the engine in a separate task so we can monitor stats
+    test_task = asyncio.create_task(engine.run(test_inputs=test_queries))
+    
+    last_turn = 0
+    while not test_task.done():
+        await asyncio.sleep(1)
+        if engine.stats.turns > last_turn:
+            lat = engine.stats.last_latency
+            latencies.append(lat)
+            print(f"✅ Turn {engine.stats.turns}: {lat:.2f}s")
+            last_turn = engine.stats.turns
             
-            # Simulate the core 'run' logic turn
-            # We skip the VAD/Loop parts and go straight to routing
-            t0 = time.time()
-            reply, needed_deep, deep = await engine.convo.route_and_respond("Auto-stress query")
+        if engine.stats.turns >= len(test_queries):
+            # Give it a moment to finish the last TTS/UI update
+            await asyncio.sleep(2)
+            break
             
-            latency = time.time() - t0
-            engine.stats.turns += 1
-            engine.stats.last_latency = latency
-            
-            print(f"  ✅ Latency: {latency:.2f}s | Reply: {reply[:50]}...")
-            
-            # Simulate small delay
-            await asyncio.sleep(0.5)
-            
-            if time.time() - start_time > 900: # 15 mins
-                print("⏱️ 15-minute stress test window reached.")
-                break
-                
-        print("\n🏆 STRESS TEST COMPLETE: 50 Turns, 0 Crashes.")
-        return True
-        
-    except Exception as e:
-        print(f"❌ STRESS TEST FAILED: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
+    print("-" * 40)
+    print("📊 Stress Test Results:")
+    if latencies:
+        avg_lat = sum(latencies) / len(latencies)
+        max_lat = max(latencies)
+        min_lat = min(latencies)
+        print(f"Total Turns: {len(latencies)}")
+        print(f"Avg Latency: {avg_lat:.2f}s")
+        print(f"Min Latency: {min_lat:.2f}s")
+        print(f"Max Latency: {max_lat:.2f}s")
+    else:
+        print("No latencies recorded. Test may have failed.")
+    print("-" * 40)
 
 if __name__ == "__main__":
     asyncio.run(run_stress_test())

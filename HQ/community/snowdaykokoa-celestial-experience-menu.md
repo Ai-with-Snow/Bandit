@@ -1,28 +1,88 @@
-# SnowDayKokoa — The Celestial Experience Menu
+# SnowDayKokoa — Brand & Booking Guide
 
-Source: Service menu request for “The Celestial Experience” somatic sensation sessions.
+> **LMSIFY Performance & Somatic Flow Division**
 
-## Overview
-- **Brand Voice:** Luxurious, spiritual, erotic wellness guided by The Celestial Goddexx Snow.
-- **Core Promise:** “Your body remembers what your mind forgets.” Sessions blend breathwork, mindful touch, and sensual ceremony.
+---
 
-## Offer Stack
-| Tier | Title | Duration | Exchange | Focus |
-| --- | --- | --- | --- | --- |
-| Mini Session | **Soft Touch Portal** | 20 min | $55 | Potent sensory alignment; ideal for newcomers exploring sensual meditation, guided breath, and grounding. |
-| Full Session | **Celestial Sensation Session** | 45–60 min | $111 | Sacred exploration of body awareness + release. Includes breathwork, mindful touch, energetic attunement, optional wax/feather tools, affirmations, and aftercare. |
-| Ritual Session | **Bound & Beyond** | 75 min | $188 | Sensual ceremony merging shibari influence, sensory deprivation, and healing dialogue. Intention setting, rope/restraint practice, 432–528 Hz sound immersion, integration moment. |
-| Dual Experience | **Celestial Merge** | 90 min | $250 | Partnered somatic journey for couples, creative duos, or play partners. Builds energetic trust, flow, and shared rhythm. |
+## Brand Identity
 
-## Add-On Menu
-- Candle Wax Flow — **$22**
-- Chakra Sound Bath — **$33**
-- Breath Coaching — **$44**
-- Personalized Affirmation Card — **$11**
+**Persona:** Goddexx Snow — Celestial Dominatrix & Somatic Dance Performer
 
-## Booking & Ops Notes
-- Sessions by appointment only (virtual or Snow Zone in-person).
-- Intake + consent form required prior to confirmation.
-- Payments accepted via **CashApp: $Snowdaykokoafund** or **Zelle: onmysleeve2020@gmail.com**.
-- Cross-promote via @SnowDayKokoa; integrate QR linking to this menu for live events.
-- Use this menu as the baseline for printed flyers, IG carousels, and web landing sections.
+**Division Focus:**
+- Performance & Flow — burlesque, somatic dance, bondage-infused artistry
+- Experiences — Bound & Beyond, Snow Zone sensual workshops
+- Afrocentric celestial visuals with "icy hot liquid nitrogen" aura
+
+**Revenue Streams:**
+- Live shows & performances
+- Workshops (private & group)
+- Private bookings & sessions
+- Branded visuals & merch
+- Digital experiences
+
+---
+
+## Performer Bio (100 words)
+
+Goddexx Snow embodies the fusion of sensual power and cosmic stillness. A celestial dominatrix and somatic dance performer, Snow channels movement as ritual—where discipline, desire, and liberation intertwine. Known for blending Afrocentric rhythm, mindful breath, and elemental flow, her performances invite audiences to witness both surrender and sovereignty. Within the lifestyle, Snow holds space that is equal parts icy edge and molten release—liquid nitrogen in motion. Through Snowdaykokoa, she transforms stages and workshops into sanctuaries of embodiment, where the body becomes both altar and instrument. Each performance is a reminder: stillness is the vibe, breath is the anchor.
+
+---
+
+## Session Pricing
+
+| Session | Duration | Price |
+|---------|----------|-------|
+| Celestial Check-In | 10 min | $30-$33 |
+| Snowdaykokoa Flow | 20 min | $55-$66 |
+| Full P.A.U.S.E. Session | 30 min | $77-$111 |
+
+**Payment Methods:**
+- CashApp: $Snowdaykokoafund
+- Zelle: onmysleeve2020@gmail.com
+
+---
+
+## Booking Response Templates
+
+### Quick Close (Returning Client)
+
+> ❄️ "Greetingz [Name], yummy question!
+> All I'd need is your availability. I have a 10-Minute Celestial Alignment Session open today at 4pm or later in the evening.
+> 
+> The exchange is $30, and in our time together we'll move through alignment while exploring how you can deepen your role within my Snowverse. 🌌✨"
+
+### Standard Booking Response
+
+> ✨ "I'd be honored to guide you through a 10-Minute Celestial Alignment P.A.U.S.E. — a quick but powerful reset to ground your breath, clear energy, and bring you back into center.
+> 
+> The energy exchange is $33. You can send through CashApp $Snowdaykokoafund or Zelle onmysleeve2020@gmail.com. Once that's anchored, I'll share the link and we'll choose the time that feels aligned. ❄️✨"
+
+### Premium Tone
+
+> 🌙 "I'm offering a 10-Minute Celestial Alignment P.A.U.S.E. — a focused reset to realign your breath and energy in the moment. The exchange is $33.
+> 
+> You can send through CashApp $Snowdaykokoafund or Zelle onmysleeve2020@gmail.com. Once your space is secured, I'll send the link and we'll confirm the time that best aligns. 🌙❄️"
+
+---
+
+## Closing Framework
+
+1. **Acknowledge the relationship** — "Loved having you in the last session"
+2. **Present the offer clearly** — dates, times, price, duration
+3. **Give simple action step** — "Send payment to [method], I'll lock in your time"
+4. **Add urgency** — "I only open limited slots each month"
+5. **Close with alignment** — "Let me know what feels best"
+
+---
+
+## NYC Market Pricing Reference
+
+| Tier | 10 min Price |
+|------|--------------|
+| Low end / intro | $30-$45 |
+| Mid-tier / standard | $55-$75 |
+| Premium / specialized | $80-$100+ |
+
+---
+
+*Last Updated: December 28, 2025*

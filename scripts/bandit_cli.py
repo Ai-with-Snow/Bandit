@@ -51,9 +51,11 @@ DEFAULT_LOCATION = "us-central1"
 # Base64 image transfer (no GCS permissions needed)
 # Updated: DAV1D v3 - Fixed spinner + Flash-Lite greetings (2025-12-10)
 DEFAULT_ENGINE_ID = "3723065118905335808"
-SEARCH_MODEL = os.getenv("BANDIT_SEARCH_MODEL", "gemini-2.5-flash")
-RAG_MODEL = os.getenv("BANDIT_RAG_MODEL", "gemini-3-pro-preview")
+# Gemini 3 Models - 1M token context, free tier
+SEARCH_MODEL = os.getenv("BANDIT_SEARCH_MODEL", "gemini-3-flash-preview")
+RAG_MODEL = os.getenv("BANDIT_RAG_MODEL", "gemini-3-flash-preview")
 RAG_EMBED_MODEL = os.getenv("BANDIT_RAG_EMBED_MODEL", "text-embedding-004")
+DEFAULT_MODEL = "gemini-3-flash-preview"  # 1M context, $0.50/$3.00 per 1M tokens
 VERTEX_AI_SEARCH_LOCATION = os.getenv("VERTEX_AI_SEARCH_LOCATION", "global")
 VERTEX_AI_SEARCH_DATA_STORE_ID = os.getenv("VERTEX_AI_SEARCH_DATA_STORE_ID")
 
@@ -652,8 +654,8 @@ async def main():
     status_table.add_column("", style="white")
     status_table.add_row("🎯 Engine", args.engine_id)
     status_table.add_row("📍 Location", args.location)
-    status_table.add_row("🧠 Router", "gemini-2.5-flash-lite")
-    status_table.add_row("⚡ Models", "Flash → Pro → Elite (3.0)")
+    status_table.add_row("🧠 Default", "gemini-3-flash-preview")
+    status_table.add_row("⚡ Models", "Flash 3 (1M ctx) → Pro 3 (deep think)")
     console.print(status_table)
     console.print()
 

@@ -1,7 +1,7 @@
 """CLI helper to run LMSIFY agents against Google GenAI Gemini models via LangChain.
 
 Supports Vertex AI credentials and integrates with LangChain for advanced agent capabilities.
-Defaults to `gemini-2.5-flash-lite` but allows opting into other production models.
+Defaults to `gemini-3-flash-preview` (1M context, free tier).
 """
 
 from __future__ import annotations
@@ -18,15 +18,19 @@ from google.oauth2 import service_account
 from langchain_google_vertexai import ChatVertexAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
+# Gemini 3 and 2.5 Models - All with 1M token context
 SUPPORTED_MODELS = [
+    # Gemini 3 (Latest)
+    "gemini-3-flash-preview",
     "gemini-3-pro-preview",
     "gemini-3-pro-image-preview",
+    # Gemini 2.5
     "gemini-2.5-pro",
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
 ]
 
-DEFAULT_MODEL = "gemini-2.5-flash-lite"
+DEFAULT_MODEL = "gemini-3-flash-preview"  # Free tier, 1M context, $0.50/$3.00 per 1M tokens
 DEFAULT_LOCATION = (
     os.getenv("GENAI_LOCATION")
     or os.getenv("GOOGLE_GENAI_LOCATION")
