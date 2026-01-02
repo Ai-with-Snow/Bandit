@@ -2,7 +2,11 @@
 .env
 .env.local
 .env.*.local
-
+credentials.json
+*.pickle
+google_token.pickle
+gmail_token.pickle
+token.pickle
 # Python
 __pycache__/
 *.py[cod]

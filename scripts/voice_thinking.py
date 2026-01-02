@@ -501,8 +501,8 @@ class EarconService:
             stream.stop_stream(); stream.close()
         except: pass
 
-    def play_start(self): self._play_tone(880, 0.1, 0.2) # High ping
-    def play_stop(self): self._play_tone(440, 0.1, 0.15) # Low bock
+    def play_start(self): pass  # Disabled - no beep
+    def play_stop(self): pass   # Disabled - no beep
     def play_error(self): 
         self._play_tone(220, 0.15, 0.3)
         self._play_tone(110, 0.2, 0.3)
@@ -511,6 +511,7 @@ class MicrophoneService:
     def __init__(self, use_vad=True, use_elgato=True, stats: Optional[SessionStats] = None):
         self.stats = stats
         self.chunk = 1024
+        self.stream = None  # Initialize to None for graceful degradation
         try:
             import pyaudio
             self.pa = pyaudio.PyAudio()
@@ -535,6 +536,7 @@ class MicrophoneService:
             self.stream.start_stream()
         except:
             self.enabled = False
+            self.stream = None  # Ensure stream is None if initialization fails
         self.vad = None
         if use_vad:
             try: import webrtcvad; self.vad = webrtcvad.Vad(2)
@@ -552,18 +554,22 @@ class MicrophoneService:
         else:
             # 2. Fallback to PyAudio
             try:
-                if self.stream.is_stopped(): self.stream.start_stream()
-                if self.stream.get_read_available() > self.chunk:
-                     self.stream.read(self.stream.get_read_available(), exception_on_overflow=False)
-                data = self.stream.read(self.chunk, exception_on_overflow=False)
-                arr = np.frombuffer(data, dtype=np.int16)
-                rms = int(np.sqrt(np.mean(arr.astype(np.float32)**2)))
+                if self.stream and not self.stream.is_stopped():
+                    if self.stream.get_read_available() > self.chunk:
+                         self.stream.read(self.stream.get_read_available(), exception_on_overflow=False)
+                    data = self.stream.read(self.chunk, exception_on_overflow=False)
+                    arr = np.frombuffer(data, dtype=np.int16)
+                    rms = int(np.sqrt(np.mean(arr.astype(np.float32)**2)))
             except: rms = 0
             
         if self.stats: self.stats.current_rms = rms
         return rms
 
     async def listen_until_silence(self, threshold, silence_duration, max_dur, display=None, transcriber=None) -> bytes:
+        # Return empty if no stream available
+        if not self.stream:
+            return b''
+            
         # Flush buffer before starting listening
         try:
             if self.stream.is_stopped(): self.stream.start_stream()
@@ -579,7 +585,7 @@ class MicrophoneService:
         
         # We must loop manually to honor max_dur
         for _ in range(int(max_dur * 16000 / self.chunk)):
-            if not self.stream.is_active(): break
+            if not self.stream or not self.stream.is_active(): break
             
             try:
                 data = self.stream.read(self.chunk, exception_on_overflow=False)

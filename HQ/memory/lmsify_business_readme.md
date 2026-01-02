@@ -22,7 +22,7 @@
 | **Status** | Active |
 | **State** | New York |
 | **County** | Bronx |
-| **Address** | 2143 Strang Avenue, Bronx, NY 10466 |
+| **Address** | Bronx, NY |
 | **Owner** | Marquitah Snowball ("Snow") |
 | **Next Statement Due** | July 31, 2027 |
 

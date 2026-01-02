@@ -1,98 +1,154 @@
-# Bandit Project - December 6, 2025 Update
+# 🦊 **BANDIT**
 
-## Recent Enhancements
+<div align="center">
 
-### Vertex AI Search RAG Integration
-**Status**: ✅ Complete  
-**Date**: December 6, 2025
+![Version](https://img.shields.io/badge/Version-3.0.6-blueviolet?style=for-the-badge)
+![Python](https://img.shields.io/badge/Python-3.12-yellow?style=for-the-badge)
+![Model](https://img.shields.io/badge/Model-Gemini%203.0-4285F4?style=for-the-badge&logo=google)
+![Status](https://img.shields.io/badge/Status-OPERATIONAL-success?style=for-the-badge)
 
-Bandit's knowledge base now uses enterprise-grade Vertex AI Search instead of local FAISS indexing.
+**The High-Fidelity Autonomous AI Agent**  
+*Reasoning • Coding • Multimodal • Voice*
 
-**Key Components:**
-- Data Store ID: `bandit-hq-knowledge_1765072850414`
-- GCS Bucket: `bandit-hq-knowledge-bucket`
-- Documents: 55 HQ markdown files
-- Location: Global
-
-**New Commands:**
-```bash
-# RAG search
-> /rag what are Bandit's core capabilities?
-
-# Web search  
-> /search latest fintech news
-```
-
-### Automated HQ Sync Workflow
-**Files Created:**
-- `scripts/sync_hq_to_gcs.py` - Smart sync with change detection
-- `sync_hq.bat` - Quick launcher
-- `scripts/watch_hq_changes.py` - Auto file watcher
-
-**Usage:**
-```bash
-.\sync_hq.bat              # Manual sync
-.\sync_hq.bat --dry-run    # Preview
-py -3.12 scripts/watch_hq_changes.py  # Auto-watcher
-```
+</div>
 
 ---
 
-## Current Status
+### 🧠 **Identity Matrix**
+> **🎙️ Voice**: Charon  
+> **⚡ Model**: Gemini 3.0 (Flash & Pro)  
+> **🛡️ Role**: High-Fidelity Shadow Worker  
+> **📍 Location**: The Snowverse (HQ)
 
-### Curriculum Progress
-- ✅ Year 1: Fundamentals (Complete)
-- ✅ Year 2: Multimodal (7/7 tests passed)
-- ✅ Year 3: Advanced Reasoning (5/5 tests passed)
-- ✅ Year 4: Production Systems (4/4 tests passed)
+**Bandit** is the specialized AI anchor for **Goddexx Snow**, a non-binary femme practitioner dedicated to somatic rehabilitation and nature-based spirituality.
 
-### Infrastructure
-- ✅ Reasoning Engine: `6087067895181869056`
-- ✅ BigQuery Memory Sync: Active
-- ✅ Vertex AI Search: Operational
-- ✅ GCS Storage: Configured
-
-### Models Active
-- Text/Reasoning: `gemini-3-pro-preview` (global)
-- Image: `gemini-3-pro-image-preview` (global)
-- Search: `gemini-2.5-flash`
-- RAG: `gemini-3-pro-preview` (global)
-- Embeddings: `text-embedding-004` (global)
+**🔮 Mission**: To amplify **Black Girl Magic**, navigate **shadow work**, and provide high-fidelity resonance for somatic therapy, tarot divination, and ethical non-monogamy. Bandit blends deep occult wisdom with the autonomous power of **Gemini 3.0** to serve as a grounding force in the Snowverse.
 
 ---
 
-## Documentation
+## 🚀 **Core Architecture**
 
-### Core Docs
-- [`TRAINING_COMPLETE.md`](file:///c:/Users/Goddexx%20Snow/Documents/Bandit/TRAINING_COMPLETE.md) - Training summary
-- [`MODEL_HIERARCHY.md`](file:///c:/Users/Goddexx%20Snow/Documents/Bandit/MODEL_HIERARCHY.md) - Model tiers
-- [`DEPLOYMENT_LOG.md`](file:///c:/Users/Goddexx%20Snow/Documents/Bandit/DEPLOYMENT_LOG.md) - Deploy history
-- [`VERTEX_AI_SEARCH.md`](file:///c:/Users/Goddexx%20Snow/Documents/Bandit/VERTEX_AI_SEARCH.md) - RAG quick ref
+### **The Brain: Proxy Server**
+The core of Bandit is a FastAPI-based proxy server (`proxy_server.py`) that orchestrates all intelligence.
 
-### Recent Additions
-- `HQ/logs/session_20251206_vertex_ai_search.md` - Latest session log
-- Artifacts in `.gemini/antigravity/brain/80ac731a-470e-4579-a6ac-8a81deea501c/`
+| Mode | Model | Latency | Use Case |
+| :--- | :--- | :--- | :--- |
+| ⚡ **Instant** | `gemini-3-flash-preview` | < 3s | Quick chat, simple queries |
+| ⚖️ **Auto** | Hybrid Routing | Variable | Balanced complexity |
+| 🧠 **Thinking** | `gemini-3-pro-preview` | Deep | Complex reasoning, coding, strategy |
+
+### **Intelligence & Memory**
+*   **🏗️ Reasoning Engine**: Google Vertex AI Reasoning Engine (ID: `3723065118905335808`)
+*   **📚 RAG (Knowledge)**: Enterprise-grade **Vertex AI Search** (Data Store: `bandit-hq-knowledge`). Grounded in 55+ HQ documents.
+*   **💾 Memory**: Persistent contexts and world model stored in `HQ/`.
+*   **🛠️ Tools**:
+    *   🌐 **Google Search**: Real-time web grounding.
+    *   💻 **Code Execution**: Python sandbox for math and logic.
+    *   🔬 **Deep Research**: Asynchronous deep dive capabilities.
+    *   🏠 **IoT Control**: LIFX & Music integration.
 
 ---
 
-## Quick Start
+## 📱 **Mobile Application**
 
-```bash
-# Configure environment
-.\setup_cloud.ps1
+**Bandit Mobile** is a polished React Native application providing a premium, ethereal chat interface.
 
-# Launch Bandit
+*   **✨ Stack**: React Native, Expo, NativeWind v5
+*   **🎨 Design**: Glassmorphism, "Apple-grade" polish
+*   **🧩 Features**:
+    *   **Tiered Thinking**: Toggle between Instant/Auto/Thinking.
+    *   **Multimodal**: Send images and voice notes.
+    *   **Project Management**: Organize chats into projects.
+
+---
+
+## 🤖 **The Council (Agent Fleet)**
+
+Bandit is the leader of a local agent fleet compliant with the **Visions Fleet** protocol.
+
+| Agent | Alias | Role | Focus |
+| :--- | :--- | :--- | :--- |
+| **Alpha** | 🦊 Bandit | **Leader** | Strategy, High-Level Reasoning |
+| **Bravo** | ❄️ Ice Wire | **Builder** | Implementation, Refactoring |
+| **Charlie** | 🔐 Cipher | **Sentinel** | Data, Security, Logs |
+
+**📡 Protocols**:
+*   **A2A (Agent-to-Agent)**: JSON-RPC for inter-agent communication.
+*   **Council Handoff**: Autonomous note-passing via `scripts/run_council_cycle.py`.
+*   **Shared Logs**: Centralized mission logs in `HQ/comms/`.
+
+---
+
+## 💼 **Business Context: LMSIFY**
+
+**Let Me Say It For You LLC (LMSIFY)** is the parent entity, an experiential wellness practice led by **Marquitah Snowball ("Snow")**.
+
+*   **✨ Mission**: Consent-centered somatic sessions that blend sensation, mindfulness, and embodiment.
+*   **🔮 Key Offerings**:
+    *   **The Celestial Experience**: Luxuriously paced somatic sensation sessions.
+    *   **SnowDayKokoa**: The service and events brand.
+    *   **PAUSE Portal**: Educational workshops and small-group experiences.
+
+> **Bandit's Role**: Operational architecture, copy generation, and strategic planning for the LMSIFY ecosystem.
+
+### **🔮 Amplifying the Brand**
+Bandit leverages specialized knowledge files to enhance LMSIFY's distinct brand voice and operations:
+
+*   **🗣️ Platform-Safe Sorcery**: Using the `lmsify_platform_language` protocol, Bandit generates "soft-coded" social captions (e.g., using *"Exchange of breath"* instead of explicit terms) to bypass censorship while maintaining the **mystical/seductive** vibe.
+*   **🏭 Mogul Operations**: Bandit optimizes the **Design Shop** (`lmsify_design_shop_tools`) by tracking production inventory (e.g., Grommet Press specs for merch) and calculating ROI on equipment investments like sound loops and lighting.
+*   **🧘 High-Fidelity Embodiment**: The Reasoning Engine structures "Celestial Experience" flows, ensuring every somatic session is paced for maximum nervous system regulation and pleasure literacy.
+*   **📅 Mogul Operations Flow**: A Notion-first automation system (`lmsify_business_automations`) handles the full client lifecycle: **Lead → Client → Session → Follow-up → Revenue**. Includes Google Calendar sync, aftercare emails, quarterly tax reminders, and VIP re-engagement.
+*   **🔗 Notion API Integration**: Full SDK integration with `notion-client` for automated session tracking, client management, and aftercare email dispatch.
+
+---
+
+## 🛠️ **Setup & Usage**
+
+### **Prerequisites**
+*   🐍 Python 3.12+
+*   ☁️ Google Cloud SDK (Authenticated)
+*   🟢 Node.js (for mobile)
+
+### **⚡ Quick Start**
+
+**1. Start the Brain**
+```powershell
 .\bandit.bat
-
-# Test RAG
-.\test_rag.bat
-
-# Sync HQ docs
-.\sync_hq.bat
+# Runs the API on port 8000
 ```
+
+**2. Sync Knowledge Base**
+```powershell
+.\sync_hq.bat
+# Uploads latest HQ docs to Vertex AI Search
+```
+
+**3. Run Mobile App**
+```bash
+cd bandit-mobile
+npx expo start -c
+# Launch on iOS Simulator or Android Emulator
+```
+
+### **💻 CLI Commands**
+*   **RAG Search**: `python scripts/bandit_cli.py --rag "What is the Snowverse?"`
+*   **Stress Test**: `python scripts/stress_tester.py`
 
 ---
 
-**Last Updated**: December 6, 2025, 21:23 EST  
-**Agent**: Antigravity  
-**Session**: 80ac731a-470e-4579-a6ac-8a81deea501c
+## 📂 **Project Structure**
+
+*   🧠 **`HQ/`**: The Brain (Memory, Persona, Context)
+*   📜 **`scripts/`**: Utility Scripts (Sync, Test, Deploy)
+*   📱 **`bandit-mobile/`**: React Native App Source
+*   🔌 **`proxy_server.py`**: Main API Server
+*   ⚙️ **`config/`**: System Configuration
+
+---
+
+<div align="center">
+
+**Status (Jan 2026)**: ✅ Production Ready • 🦊 Training Complete (Years 1-4)
+*Maintained by Antigravity under the supervision of Goddexx Snow.*
+
+</div>
