@@ -1,17 +1,21 @@
 # Cloud Build configuration for Bandit
 # Deploys to Cloud Run with proper IAM for Vertex AI access
+# Trigger: Push to main branch → Deploy to Cloud Run (alpha)
 
 steps:
   # Build the container image
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/bandit:$COMMIT_SHA', '.']
+  - id: 'build'
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/bandit:$COMMIT_SHA', '-t', 'gcr.io/$PROJECT_ID/bandit:latest', '.']
 
   # Push the container image to Container Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/bandit:$COMMIT_SHA']
+  - id: 'push'
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '--all-tags', 'gcr.io/$PROJECT_ID/bandit']
 
-  # Deploy container image to Cloud Run
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  # Deploy container image to Cloud Run (alpha)
+  - id: 'deploy-alpha'
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
       - 'run'
@@ -34,11 +38,15 @@ steps:
       - '80'
       - '--max-instances'
       - '10'
+      - '--min-instances'
+      - '0'
       - '--set-env-vars'
-      - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID,DEFAULT_LOCATION=global'
+      - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID,DEFAULT_LOCATION=global,DEFAULT_ENGINE_ID=3723065118905335808'
 
 images:
   - 'gcr.io/$PROJECT_ID/bandit:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/bandit:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'

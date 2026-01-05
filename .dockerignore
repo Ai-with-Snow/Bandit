@@ -1,12 +1,43 @@
+# Exclude version control
 .git
+.gitignore
+
+# Exclude Python virtual environments
 .venv
+venv
 __pycache__
 *.pyc
 *.pyo
 *.pyd
 .pytest_cache
+
+# Exclude logs and test results (not needed in production)
+logs/
 test_output.txt
 *.log
-generated_images
+
+# Exclude development-only files
+generated_images/
 bandit_memory.db
-tests
+tests/
+docs/
+notes/
+
+# Exclude mobile app (separate deployment)
+bandit-mobile/
+
+# Exclude reference materials (large)
+reference/
+
+# Exclude screenplays (session logs)
+screenplays/
+
+# Exclude local credentials (use Cloud Run service account)
+credentials.json
+google_token.pickle
+.env.local
+
+# Exclude batch/shell scripts (not needed in container)
+scripts/batch/
+scripts/shell/
+scripts/screenplays/
