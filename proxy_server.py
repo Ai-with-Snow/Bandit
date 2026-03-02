@@ -900,10 +900,23 @@ async def get_cached_response(prompt: str = ""):
     return {"cached": False, "key": key[:8]}
 
 # Models
+class Message(BaseModel):
+    role: str
+    content: Union[str, List[Dict[str, Any]]]
+    name: Optional[str] = None
+
 class Choice(BaseModel):
     index: int
     message: Message
     finish_reason: str
+
+class ChatCompletionRequest(BaseModel):
+    model: str = "bandit-v1.0"
+    messages: List[Message]
+    temperature: Optional[float] = 0.7
+    max_tokens: Optional[int] = None
+    stream: bool = False
+    thinking_mode: Optional[str] = "auto"  # 'instant' = flash-lite bypass, 'thinking' = full reasoning, 'auto' = adaptive
 
 class ChatCompletionResponse(BaseModel):
     id: str
