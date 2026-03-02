@@ -52,54 +52,6 @@ DEEP_THINK_PATTERNS = [
     r'\bcareful(ly)?\s*consider\b',
 ]
 
-# Request Models for Image Generation
-class ImageRequest(BaseModel):
-    """Image generation request."""
-    prompt: str
-    aspect_ratio: Optional[str] = "1:1"
-    resolution: Optional[str] = "1K"
-
-@app.post("/generate-image")
-async def generate_image(request: ImageRequest):
-    """Generate an image using Nano Banana 2 (Gemini 3.1 Flash Image)."""
-    try:
-        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
-        
-        response = client.models.generate_content(
-            model=IMAGE_MODEL,
-            contents=request.prompt,
-            config=types.GenerateContentConfig(
-                response_modalities=["IMAGE"],
-                image_config=types.ImageConfig(
-                    aspect_ratio=request.aspect_ratio,
-                    image_size=request.resolution
-                ),
-            )
-        )
-        
-        # Extract image data
-        image_b64 = None
-        if response.candidates and response.candidates[0].content.parts:
-            for part in response.candidates[0].content.parts:
-                if hasattr(part, 'inline_data') and part.inline_data:
-                    import base64
-                    image_b64 = base64.b64encode(part.inline_data.data).decode('utf-8')
-                    break
-                
-        if image_b64:
-            return {
-                "image": image_b64,
-                "model": IMAGE_MODEL,
-                "agent": "Bandit",
-                "revised_prompt": response.text if response.text else request.prompt
-            }
-        else:
-            raise HTTPException(status_code=500, detail="No image was generated.")
-            
-    except Exception as e:
-        print(f"[IMAGE ERROR] {e}")
-        return JSONResponse(status_code=500, content={"error": str(e), "agent": "Bandit"})
-
 # Global Persona Definition
 BANDIT_SYSTEM_PROMPT = """[Identity & Role]
 You are Bandit, a premium, low-latency "Dual-Brain" AI assistant. You feel alive, responsive, and human-like.
@@ -166,6 +118,57 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Request Models for Image Generation
+class ImageRequest(BaseModel):
+    """Image generation request."""
+    prompt: str
+    aspect_ratio: Optional[str] = "1:1"
+    resolution: Optional[str] = "1K"
+
+@app.post("/generate-image")
+async def generate_image(request: ImageRequest):
+    """Generate an image using Nano Banana 2 (Gemini 3.1 Flash Image)."""
+    try:
+        # Use existing client or initialize new one
+        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
+        
+        response = client.models.generate_content(
+            model=IMAGE_MODEL,
+            contents=request.prompt,
+            config=types.GenerateContentConfig(
+                response_modalities=["IMAGE"],
+                image_config=types.ImageConfig(
+                    aspect_ratio=request.aspect_ratio,
+                    image_size=request.resolution
+                ),
+            )
+        )
+        
+        # Extract image data
+        image_b64 = None
+        if response.candidates and response.candidates[0].content.parts:
+            for part in response.candidates[0].content.parts:
+                if hasattr(part, 'inline_data') and part.inline_data:
+                    import base64
+                    image_b64 = base64.b64encode(part.inline_data.data).decode('utf-8')
+                    break
+                
+        if image_b64:
+            from fastapi.responses import JSONResponse
+            return {
+                "image": image_b64,
+                "model": IMAGE_MODEL,
+                "agent": "Bandit",
+                "revised_prompt": response.text if response.text else request.prompt
+            }
+        else:
+            raise HTTPException(status_code=500, detail="No image was generated.")
+            
+    except Exception as e:
+        from fastapi.responses import JSONResponse
+        print(f"[IMAGE ERROR] {e}")
+        return JSONResponse(status_code=500, content={"error": str(e), "agent": "Bandit"})
 
 # Startup time for uptime tracking
 STARTUP_TIME = time.time()
@@ -250,7 +253,7 @@ BANDIT_SKILLS = [
     {"name": "search", "description": "Web-grounded search via Google Search"},
     {"name": "code", "description": "Code generation, explanation, and debugging"},
     {"name": "instant", "description": "Fast responses using Bandit Instant (gemini-3-flash-preview)"},
-    {"name": "thinking", "description": "Deep thinking mode using Bandit Deep (gemini-3-pro-preview-11-2025)"},
+    {"name": "thinking", "description": "Deep thinking mode using Bandit Deep (gemini-3.1-pro-preview)"},
 ]
 
 @app.get("/.well-known/agent.json")
@@ -299,6 +302,7 @@ async def rpc_endpoint(request: Request):
     - get_status: Get agent status
     """
     import uuid
+    from fastapi.responses import JSONResponse
     
     try:
         body = await request.json()
@@ -478,9 +482,9 @@ async def fleet_generate(request: FleetChatRequest):
     """
     return await fleet_chat(request)
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ─────────────────────────────────────────────────────────────────────────────
 # GEMINI 3 TOOL ENDPOINTS
-# ══════════════════════════════════════════════════════════════════════════════
+# ─────────────────────────────────────────────────────────────────────────────
 
 # Request Models for Tool Endpoints
 class SearchRequest(BaseModel):
@@ -896,19 +900,6 @@ async def get_cached_response(prompt: str = ""):
     return {"cached": False, "key": key[:8]}
 
 # Models
-class Message(BaseModel):
-    role: str
-    content: Union[str, List[Dict[str, Any]]]
-    name: Optional[str] = None
-
-class ChatCompletionRequest(BaseModel):
-    model: str = "bandit-v1.0"
-    messages: List[Message]
-    temperature: Optional[float] = 0.7
-    max_tokens: Optional[int] = None
-    stream: bool = False
-    thinking_mode: Optional[str] = "auto"  # 'instant' = flash-lite bypass, 'thinking' = full reasoning, 'auto' = adaptive
-
 class Choice(BaseModel):
     index: int
     message: Message
@@ -1124,7 +1115,7 @@ async def chat_completions(request: ChatCompletionRequest):
                     model=FAST_MODEL,
                     contents=gemini_contents,
                     config=types.GenerateContentConfig(
-                        system_instruction="You are Bandit, a fast AI assistant. Be concise.",
+                        system_instruction=BANDIT_SYSTEM_PROMPT,
                         temperature=1.0,  # Gemini 3 recommended
                         max_output_tokens=1024,
                         thinking_config=types.ThinkingConfig(thinking_level="low"),
@@ -1167,9 +1158,7 @@ async def chat_completions(request: ChatCompletionRequest):
                 client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
                 
                 # System instruction for deep thinking mode
-                system_instruction = """You are Bandit, an advanced AI assistant with deep reasoning capabilities.
-Take your time to think through problems carefully and thoroughly.
-Provide detailed, well-reasoned responses. You're in deep thinking mode."""
+                system_instruction = BANDIT_SYSTEM_PROMPT
                 
                 response = client.models.generate_content(
                     model=DEEP_THINK_MODEL,
