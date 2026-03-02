@@ -63,7 +63,7 @@ except Exception:
 
 print(f"[*] Detected Project ID: {PROJECT_ID}")
 
-LOCATION = "us-central1"
+LOCATION = "global"
 
 SESSIONS_DIR = Path("./sessions")
 

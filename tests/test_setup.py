@@ -24,7 +24,7 @@ class TestEnvironmentSetup:
         client = genai.Client(
             vertexai=True,
             project="goddexxsnow",
-            location="us-central1"
+            location="global"
         )
         assert client is not None
     
@@ -34,7 +34,7 @@ class TestEnvironmentSetup:
         client = genai.Client(
             vertexai=True,
             project="goddexxsnow",
-            location="us-central1"
+            location="global"
         )
         resp = client.models.generate_content(
             model='gemini-2.5-flash',

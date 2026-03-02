@@ -1,7 +1,7 @@
-"""Deploy helper for running Gemini agents from Google Cloud Shell or local CLI.
+"""Interactive Deploy helper for Bandit and LMSIFY HQ.
 
-Resolves credentials (API key vs. Vertex AI), picks a Gemini model, and runs a
-smoke prompt so you can confirm access to Google GenAI.
+Provides a rich terminal UI with 'buttons' (selectable options) for 
+deploying the reasoning engine, running smoke tests, and building containers.
 """
 
 from __future__ import annotations
@@ -13,21 +13,28 @@ import subprocess
 import sys
 from typing import Optional
 
+from rich.console import Console
+from rich.panel import Panel
+from rich.prompt import Prompt, Confirm
+from rich import print as rprint
+from rich.table import Table
+
 import agents
 
 DEFAULT_LOCATION = (
     os.getenv("GENAI_LOCATION")
     or os.getenv("GOOGLE_GENAI_LOCATION")
-    or "us-central1"
+    or "global"
 )
 
+console = Console()
 
 def in_cloud_shell() -> bool:
     """Check whether the script is running inside Cloud Shell."""
     return os.getenv("CLOUD_SHELL", "").lower() == "true"
 
 
-def resolve_project(explicit: Optional[str]) -> Optional[str]:
+def resolve_project(explicit: Optional[str] = None) -> Optional[str]:
     """Pick a project from CLI, environment, or gcloud config."""
     if explicit:
         return explicit
@@ -49,105 +56,106 @@ def resolve_project(explicit: Optional[str]) -> Optional[str]:
 
     return None
 
+def show_menu() -> str:
+    """Display an interactive menu mimicking buttons."""
+    console.clear()
+    rprint(Panel.fit(
+        "[bold magenta]🦊 BANDIT DEPLOYMENT CENTER[/bold magenta]\n"
+        "[cyan]Select an operation to execute:[/cyan]", 
+        border_style="magenta"
+    ))
+    
+    table = Table(show_header=False, box=None)
+    table.add_column("Key", style="bold green")
+    table.add_column("Action", style="white")
+    
+    table.add_row("[1]", "🚀 Deploy Reasoning Engine (Vertex AI)")
+    table.add_row("[2]", "🐳 Deploy Proxy Server (Cloud Run)")
+    table.add_row("[3]", "🧪 Run Smoke Test (Ping Gemini)")
+    table.add_row("[4]", "📋 List Supported Models")
+    table.add_row("[5]", "🛠  Update Configuration (Project/Location)")
+    table.add_row("[q]", "❌ Quit")
+    
+    console.print(table)
+    rprint("")
+    
+    choice = Prompt.ask("[yellow]Select an option[/yellow]", choices=["1", "2", "3", "4", "5", "q"])
+    return choice
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Configure and smoke-test Google GenAI from Cloud Shell.",
-    )
-    parser.add_argument(
-        "--project",
-        help="Google Cloud project for Vertex AI (used when GOOGLE_API_KEY is missing).",
-    )
-    parser.add_argument(
-        "--location",
-        default=DEFAULT_LOCATION,
-        help=f"Vertex AI region (default: {DEFAULT_LOCATION}).",
-    )
-    parser.add_argument(
-        "--model",
-        choices=agents.SUPPORTED_MODELS,
-        default=agents.DEFAULT_MODEL,
-        help=f"Gemini model to target (default: {agents.DEFAULT_MODEL}).",
-    )
-    parser.add_argument(
-        "--prompt",
-        default="Ping from LMSIFY Cloud Shell.",
-        help="Prompt to send for the smoke test.",
-    )
-    parser.add_argument(
-        "--system",
-        help="Optional path to agent instructions for system_instruction.",
-    )
-    parser.add_argument(
-        "--api-key",
-        dest="api_key",
-        default=os.getenv("GOOGLE_API_KEY"),
-        help="Google AI Studio API key. If omitted, Vertex AI is used.",
-    )
-    parser.add_argument(
-        "--vertex",
-        action="store_true",
-        help="Force Vertex AI even if an API key is present.",
-    )
-    parser.add_argument(
-        "--stream",
-        action="store_true",
-        help="Stream the response for the smoke test.",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Print resolved settings without calling the model.",
-    )
-    parser.add_argument(
-        "--list-models",
-        action="store_true",
-        help="List supported models and exit.",
-    )
-    return parser
+def run_reasoning_engine_deploy(project: str):
+    """Trigger the deploy_reasoning_engine.py script."""
+    rprint(f"\n[bold cyan]Deploying Reasoning Engine to {project}...[/bold cyan]")
+    staging_bucket = Prompt.ask("Enter GCS staging bucket (e.g., gs://my-bucket)", default=f"gs://{project}-reasoning-staging")
+    
+    if Confirm.ask(f"Deploy using bucket {staging_bucket}?"):
+        cmd = [sys.executable, "scripts/deploy_reasoning_engine.py", "--project", project, "--staging-bucket", staging_bucket]
+        subprocess.run(cmd)
 
+def run_cloud_run_deploy(project: str):
+    """Trigger the Cloud Build deployment for Cloud Run."""
+    rprint(f"\n[bold cyan]Deploying Proxy Server to Cloud Run...[/bold cyan]")
+    if Confirm.ask("Submit build to Google Cloud Build?"):
+        cmd = ["gcloud", "builds", "submit", "--config", "cloudbuild.yaml", ".", "--project", project]
+        subprocess.run(cmd)
+
+def run_smoke_test(project: str, location: str):
+    """Run a prompt against the configured model."""
+    rprint(f"\n[bold cyan]Running Smoke Test...[/bold cyan]")
+    prompt = Prompt.ask("Enter prompt", default="Ping from LMSIFY.")
+    model = Prompt.ask("Select model", default=agents.DEFAULT_MODEL)
+    
+    settings = agents.GenAISettings(
+        model=model,
+        project=project,
+        location=location,
+        system_instruction=None,
+        api_key=os.getenv("GOOGLE_API_KEY"),
+    )
+    
+    try:
+        rprint("[dim]Sending request...[/dim]")
+        response = agents.run_prompt(prompt, settings, stream=True)
+        if response:
+            rprint(f"\n[bold green]Response:[/bold green] {response}")
+    except Exception as e:
+        rprint(f"[bold red]Error:[/bold red] {e}")
+        
+    Prompt.ask("\nPress Enter to continue")
+
+def list_models():
+    """List supported models."""
+    rprint("\n[bold cyan]Supported Models:[/bold cyan]")
+    for model in agents.SUPPORTED_MODELS:
+        rprint(f"  - {model}")
+    Prompt.ask("\nPress Enter to continue")
 
 def main() -> None:
-    parser = build_parser()
-    args = parser.parse_args()
-
-    if args.list_models:
-        print("Supported models:")
-        for model in agents.SUPPORTED_MODELS:
-            print(f"- {model}")
-        return
-
-    project = resolve_project(args.project)
-    settings = agents.GenAISettings(
-        model=args.model,
-        project=project,
-        location=args.location or DEFAULT_LOCATION,
-        system_instruction=agents.load_text(args.system),
-        api_key=args.api_key,
-    )
-
-    print("[deploy] Environment summary:")
-    print(f"- Cloud Shell: {'yes' if in_cloud_shell() else 'no'}")
-    print(f"- Mode: Vertex AI (LangChain)")
-    print(f"- Model: {settings.model}")
-    print(f"- Project: {settings.project or 'n/a'}")
-    print(f"- Location: {settings.location}")
-    print(f"- API key fallback: {'yes' if args.api_key else 'no'}")
-
+    project = resolve_project()
+    location = DEFAULT_LOCATION
+    
     if not project:
-        parser.error("Vertex AI requested but no project found. Set --project or GOOGLE_CLOUD_PROJECT.")
-
-    if args.dry_run:
-        return
-
-    try:
-        response = agents.run_prompt(args.prompt, settings, stream=args.stream)
-        if response:
-            print(response)
-    except Exception as exc:  # pragma: no cover - CLI surface
-        print(f"[deploy] Error: {exc}", file=sys.stderr)
-        raise SystemExit(1) from exc
-
+        rprint("[bold red]Warning: No default GCP project found.[/bold red]")
+        project = Prompt.ask("Please enter your Google Cloud Project ID")
+    
+    while True:
+        choice = show_menu()
+        
+        if choice == '1':
+            run_reasoning_engine_deploy(project)
+        elif choice == '2':
+            run_cloud_run_deploy(project)
+        elif choice == '3':
+            run_smoke_test(project, location)
+        elif choice == '4':
+            list_models()
+        elif choice == '5':
+            project = Prompt.ask("Enter new Project ID", default=project)
+            location = Prompt.ask("Enter new Location", default=location)
+            rprint("[green]Configuration updated![/green]")
+            Prompt.ask("\nPress Enter to continue")
+        elif choice == 'q':
+            rprint("[magenta]Exiting Bandit Deployment Center. Goodbye![/magenta]")
+            break
 
 if __name__ == "__main__":
     main()

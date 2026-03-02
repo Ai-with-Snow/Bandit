@@ -14,9 +14,20 @@ __pycache__/
 .Python
 venv/
 .venv/
+venv_linux/
 *.egg-info/
 dist/
 build/
+
+# Node
+node_modules/
+
+# Flutter
+bandit_flutter/.dart_tool/
+bandit_flutter/build/
+bandit_flutter/.pub-cache/
+bandit_flutter/.pub/
+
 
 # Generated files
 generated_images/

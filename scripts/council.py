@@ -79,7 +79,7 @@ def _get_genai_client():
     from google.genai.types import HttpOptions
     
     project = os.getenv("GOOGLE_CLOUD_PROJECT", "project-5f169828-6f8d-450b-923")
-    location = os.getenv("BANDIT_LOCATION", "us-central1")
+    location = os.getenv("BANDIT_LOCATION", "global")
     
     return genai.Client(
         vertexai=True,

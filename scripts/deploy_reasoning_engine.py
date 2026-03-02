@@ -19,7 +19,7 @@ from typing import Dict, Any, List
 
 # Hardcoded for now, but could be dynamic
 DEFAULT_PROJECT = "project-5f169828-6f8d-450b-923"
-DEFAULT_LOCATION = "us-central1"
+DEFAULT_LOCATION = "global"
 STAGING_BUCKET = "gs://project-5f169828-6f8d-450b-923-bucket" # Placeholder, user might need to create this
 
 # Model cost tracking (approximate per query based on DAV1D's analysis)
@@ -69,11 +69,11 @@ class BanditEngine:
             'lite': ChatVertexAI(model_name="gemini-2.5-flash-lite", temperature=0.7),  # Router
             'flash': ChatVertexAI(model_name="gemini-2.5-flash", temperature=0.7),
             'pro': ChatVertexAI(model_name="gemini-2.5-pro", temperature=0.7),
-            # Elite uses global endpoint for Gemini 3
+            # Elite uses global endpoint for Gemini 3.1
             'elite': ChatVertexAI(
-                model_name="gemini-3-pro-preview", 
+                model_name="gemini-3.1-pro-preview", 
                 temperature=1.0,
-                location="global"  # Gemini 3 requires global endpoint
+                location="global"  # Gemini 3.x requires global endpoint
             ),
         }
         

@@ -43,9 +43,9 @@ def setup_client():
     if GEMINI_API_KEY:
         client = genai.Client(api_key=GEMINI_API_KEY)
     else:
-        try:
-            client = genai.Client(vertexai=True, project=GCP_PROJECT, location='us-central1')
-        except:
+        if GCP_PROJECT:
+            client = genai.Client(vertexai=True, project=GCP_PROJECT, location='global')
+        else:
              client = genai.Client(vertexai=True, project=GCP_PROJECT, location='global')
 
 @pytest.fixture(scope="function", autouse=True)

@@ -32,7 +32,7 @@ lib = LazyLoader()
 class GCPVoiceAIBackend:
     """Complete GCP-integrated voice AI backend (Lazy Loaded)"""
     
-    def __init__(self, project_id=None, location="us-central1", client=None):
+    def __init__(self, project_id=None, location="global", client=None):
         self.project_id = project_id or os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCP_PROJECT")
         self.location = location
         self.genai_client = client # Optional reuse

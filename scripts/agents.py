@@ -34,7 +34,7 @@ DEFAULT_MODEL = "gemini-3-flash-preview"  # Free tier, 1M context, $0.50/$3.00 p
 DEFAULT_LOCATION = (
     os.getenv("GENAI_LOCATION")
     or os.getenv("GOOGLE_GENAI_LOCATION")
-    or "us-central1"
+    or "global"
 )
 
 

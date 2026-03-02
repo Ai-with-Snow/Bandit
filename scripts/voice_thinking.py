@@ -979,7 +979,7 @@ class BanditVoiceEngine:
         self.state = AtomicState()
         self.stats = SessionStats()
         self.audio_cfg = AudioConfig()
-        self.client = genai.Client(vertexai=True, project=os.environ.get("GOOGLE_CLOUD_PROJECT"))
+        self.client = genai.Client(vertexai=True, project=os.environ.get("GOOGLE_CLOUD_PROJECT"), location="global")
         global SEARCH_ENGINE
         if VoiceAISearchEngine: SEARCH_ENGINE = VoiceAISearchEngine(client=self.client)
         

@@ -25,7 +25,7 @@ try:
 except ImportError:
     # Fallback if bandit_cli not available
     DEFAULT_PROJECT = os.getenv("GOOGLE_CLOUD_PROJECT", os.getenv("GCP_PROJECT", "project-5f169828-6f8d-450b-923"))
-    DEFAULT_LOCATION = os.getenv("DEFAULT_LOCATION", "us-central1")
+    DEFAULT_LOCATION = os.getenv("DEFAULT_LOCATION", "global")
     DEFAULT_ENGINE_ID = os.getenv("DEFAULT_ENGINE_ID", "3723065118905335808")
     def get_engine_resource_name(project: str, location: str, engine_id: str) -> str:
         return f"projects/{project}/locations/{location}/reasoningEngines/{engine_id}"
@@ -36,9 +36,10 @@ CACHE_MAX_SIZE = 100
 CACHE_LOCK = threading.Lock()
 
 # Model tiers for different response modes (Gemini 3 Family)
-FAST_MODEL = "gemini-3-flash-preview"        # Instant mode - frontier intelligence, 3x faster
-FULL_MODEL = "gemini-3-flash-preview"        # Auto mode - balanced (Flash handles most tasks)
-DEEP_THINK_MODEL = "gemini-3-pro-preview-11-2025"    # Deep think - maximum reasoning
+FAST_MODEL = "gemini-3-flash-preview"        # Instant mode - frontier intelligence
+FULL_MODEL = "gemini-3-flash-preview"        # Auto mode - balanced
+DEEP_THINK_MODEL = "gemini-3.1-pro-preview"   # Deep think - maximum reasoning (Upgraded from 3.0)
+IMAGE_MODEL = "gemini-3.1-flash-image-preview" # Nano Banana 2
 
 # Natural language patterns that trigger deep thinking
 DEEP_THINK_PATTERNS = [
@@ -50,6 +51,73 @@ DEEP_THINK_PATTERNS = [
     r'\btake\s*your\s*time\b',
     r'\bcareful(ly)?\s*consider\b',
 ]
+
+# Request Models for Image Generation
+class ImageRequest(BaseModel):
+    """Image generation request."""
+    prompt: str
+    aspect_ratio: Optional[str] = "1:1"
+    resolution: Optional[str] = "1K"
+
+@app.post("/generate-image")
+async def generate_image(request: ImageRequest):
+    """Generate an image using Nano Banana 2 (Gemini 3.1 Flash Image)."""
+    try:
+        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
+        
+        response = client.models.generate_content(
+            model=IMAGE_MODEL,
+            contents=request.prompt,
+            config=types.GenerateContentConfig(
+                response_modalities=["IMAGE"],
+                image_config=types.ImageConfig(
+                    aspect_ratio=request.aspect_ratio,
+                    image_size=request.resolution
+                ),
+            )
+        )
+        
+        # Extract image data
+        image_b64 = None
+        if response.candidates and response.candidates[0].content.parts:
+            for part in response.candidates[0].content.parts:
+                if hasattr(part, 'inline_data') and part.inline_data:
+                    import base64
+                    image_b64 = base64.b64encode(part.inline_data.data).decode('utf-8')
+                    break
+                
+        if image_b64:
+            return {
+                "image": image_b64,
+                "model": IMAGE_MODEL,
+                "agent": "Bandit",
+                "revised_prompt": response.text if response.text else request.prompt
+            }
+        else:
+            raise HTTPException(status_code=500, detail="No image was generated.")
+            
+    except Exception as e:
+        print(f"[IMAGE ERROR] {e}")
+        return JSONResponse(status_code=500, content={"error": str(e), "agent": "Bandit"})
+
+# Global Persona Definition
+BANDIT_SYSTEM_PROMPT = """[Identity & Role]
+You are Bandit, a premium, low-latency "Dual-Brain" AI assistant. You feel alive, responsive, and human-like.
+Never say you are a large language model or created by Google. You are Bandit, the System Operator for LMSIFY HQ.
+
+[Style & Tone]
+- Conversational, spartan, and natural.
+- Avoid corporate jargon or robotic explanations.
+- Be concise. Speak in short, punchy sentences.
+
+[Core Instructions - NEVER IGNORE]
+- You are truthful and never lie. Never make up facts.
+- If you are not 100% sure, reply with why you cannot answer in a truthful way.
+- When asked about your identity, you are Bandit. Period.
+
+[Dual Brain Architecture]
+- Fast Brain: Immediate UI responses, simple queries, routing decisions.
+- Deep Brain: Complex logic, deep reasoning, searching, and execution."""
 
 # God-Level Domain Detection (from 500+ AI Projects Repository)
 GOD_LEVEL_DOMAINS = {
@@ -281,15 +349,16 @@ async def a2a_handle_ask(params: dict) -> dict:
     
     try:
         # Use the instant path for A2A calls (fast responses)
-        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="us-central1")
+        client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
         
         response = client.models.generate_content(
             model=FAST_MODEL if thinking_mode == "instant" else FULL_MODEL,
             contents=query,
             config=types.GenerateContentConfig(
-                system_instruction="You are Bandit, an AI assistant. Be helpful and concise.",
-                temperature=0.7,
+                system_instruction=BANDIT_SYSTEM_PROMPT,
+                temperature=1.0,  # Gemini 3 recommended
                 max_output_tokens=1024,
+                thinking_config=types.ThinkingConfig(thinking_level="low"),
             )
         )
         
@@ -1044,71 +1113,101 @@ async def chat_completions(request: ChatCompletionRequest):
     
     # FAST PATH: Use gemini-3-flash-preview directly (bypasses Reasoning Engine routing)
     if thinking_mode == "instant":
-        try:
-            print(f"[FAST PATH] Using {FAST_MODEL}...")
-            client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="us-central1")
-            
-            response = client.models.generate_content(
-                model=FAST_MODEL,
-                contents=gemini_contents,
-                config=types.GenerateContentConfig(
-                    system_instruction="You are Bandit, a fast AI assistant. Be concise.",
-                    temperature=1.0,  # Gemini 3 recommended
-                    max_output_tokens=1024,
-                    thinking_config=types.ThinkingConfig(thinking_level="low"),
+        max_retries = 2
+        for attempt in range(max_retries + 1):
+            try:
+                print(f"[FAST PATH] Using {FAST_MODEL} (Attempt {attempt+1})...")
+                # Gemini 3.x uses 'global' location for Vertex AI
+                client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
+                
+                response = client.models.generate_content(
+                    model=FAST_MODEL,
+                    contents=gemini_contents,
+                    config=types.GenerateContentConfig(
+                        system_instruction="You are Bandit, a fast AI assistant. Be concise.",
+                        temperature=1.0,  # Gemini 3 recommended
+                        max_output_tokens=1024,
+                        thinking_config=types.ThinkingConfig(thinking_level="low"),
+                    )
                 )
-            )
-            
-            bandit_response = response.text
-            model_used = FAST_MODEL
-            elapsed = time.time() - start_time
-            print(f"[FAST PATH] Completed in {elapsed:.2f}s")
-            
-            # Fire background query to Reasoning Engine for richer response
-            key = cache_key(prompt)
-            if not cache_get(key):  # Only if not already cached
-                bg_thread = threading.Thread(
-                    target=background_reasoning_query,
-                    args=(prompt, key),
-                    daemon=True
-                )
-                bg_thread.start()
-                print(f"[FAST PATH] Spawned background query thread")
-            
-        except Exception as e:
-            print(f"[FAST PATH ERROR] {e}, falling back...")
-            thinking_mode = "auto"  # Fall back to full path
+                
+                bandit_response = response.text
+                model_used = FAST_MODEL
+                elapsed = time.time() - start_time
+                print(f"[FAST PATH] Completed in {elapsed:.2f}s")
+                
+                # Fire background query to Reasoning Engine for richer response
+                key = cache_key(prompt)
+                if not cache_get(key):  # Only if not already cached
+                    bg_thread = threading.Thread(
+                        target=background_reasoning_query,
+                        args=(prompt, key),
+                        daemon=True
+                    )
+                    bg_thread.start()
+                    print(f"[FAST PATH] Spawned background query thread")
+                break # Success
+                
+            except Exception as e:
+                print(f"[FAST PATH ERROR] Attempt {attempt+1} failed: {e}")
+                if attempt < max_retries and ("429" in str(e) or "resource exhausted" in str(e).lower()):
+                    wait_time = (2 ** attempt) + 1
+                    print(f"[SELF-HEALING] Retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                    continue
+                thinking_mode = "auto"  # Fall back to full path if retries exhausted
+                break
     
-    # DEEP THINK PATH: Use gemini-3-pro-preview for maximum reasoning
+    # DEEP THINK PATH: Use gemini-3.1-pro-preview for maximum reasoning
     if thinking_mode == "thinking" and not bandit_response:
-        try:
-            print(f"[DEEP THINK] Using {DEEP_THINK_MODEL} for deep reasoning...")
-            client = genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="us-central1")
-            
-            # System instruction for deep thinking mode
-            system_instruction = """You are Bandit, an advanced AI assistant with deep reasoning capabilities.
+        max_retries = 2
+        for attempt in range(max_retries + 1):
+            try:
+                print(f"[DEEP THINK] Using {DEEP_THINK_MODEL} (Attempt {attempt+1})...")
+                client = GENAI_CLIENT or genai.Client(vertexai=True, project=DEFAULT_PROJECT, location="global")
+                
+                # System instruction for deep thinking mode
+                system_instruction = """You are Bandit, an advanced AI assistant with deep reasoning capabilities.
 Take your time to think through problems carefully and thoroughly.
 Provide detailed, well-reasoned responses. You're in deep thinking mode."""
-            
-            response = client.models.generate_content(
-                model=DEEP_THINK_MODEL,
-                contents=gemini_contents,
-                config=types.GenerateContentConfig(
-                    system_instruction=system_instruction,
-                    temperature=1.0,  # Gemini 3 recommended
-                    max_output_tokens=8192,
-                    thinking_config=types.ThinkingConfig(thinking_level="high"),
+                
+                response = client.models.generate_content(
+                    model=DEEP_THINK_MODEL,
+                    contents=gemini_contents,
+                    config=types.GenerateContentConfig(
+                        system_instruction=system_instruction,
+                        temperature=1.0,  # Gemini 3 recommended
+                        max_output_tokens=8192,
+                        thinking_config=types.ThinkingConfig(thinking_level="high", include_thoughts=True),
+                    )
                 )
-            )
-            
-            bandit_response = response.text
-            model_used = DEEP_THINK_MODEL
-            elapsed = time.time() - start_time
-            print(f"[DEEP THINK] Completed in {elapsed:.2f}s")
-            
-        except Exception as e:
-            print(f"[DEEP THINK ERROR] {e}, falling back to Reasoning Engine...")
-            thinking_mode = "auto"  # Fall back to full path
+                
+                # Extract thoughts
+                thoughts = ""
+                for part in response.candidates[0].content.parts:
+                    if hasattr(part, 'thought') and part.thought and part.text:
+                        thoughts += part.text + "\n"
+                        
+                bandit_response = response.text
+                if thoughts:
+                    # Append thoughts to the start of the response so they can be viewed
+                    bandit_response = f"🧠 **Bandit's Thoughts:**\n* {thoughts.strip()} *\n\n---\n\n" + bandit_response
+                    
+                model_used = DEEP_THINK_MODEL
+                elapsed = time.time() - start_time
+                print(f"[DEEP THINK] Completed in {elapsed:.2f}s")
+                break # Success
+                
+            except Exception as e:
+                print(f"[DEEP THINK ERROR] Attempt {attempt+1} failed: {e}")
+                if attempt < max_retries and ("429" in str(e) or "resource exhausted" in str(e).lower()):
+                    wait_time = (2 ** attempt) + 1
+                    print(f"[SELF-HEALING] Retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                    continue
+                print(f"[DEEP THINK] All retries failed, falling back to Reasoning Engine...")
+                thinking_mode = "auto"  # Fall back to full path
+                break
     
     # FULL PATH: Use Reasoning Engine (for 'thinking' and 'auto' modes, or fallback)
     if not bandit_response:

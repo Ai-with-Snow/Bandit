@@ -10,9 +10,12 @@ async def probe_thinking():
     import google.auth
     try:
         _, PROJECT_ID = google.auth.default()
-        client = genai.Client(vertexai=True, project=PROJECT_ID, location="us-central1")
-    except:
-        client = genai.Client(vertexai=True, location="us-central1")
+        if PROJECT_ID:
+            client = genai.Client(vertexai=True, project=PROJECT_ID, location="global")
+        else:
+            client = genai.Client(vertexai=True, location="global")
+    except Exception:
+        client = genai.Client(vertexai=True, location="global")
 
     model = "gemini-2.5-flash"
     

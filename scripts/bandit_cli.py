@@ -47,7 +47,7 @@ console = Console(theme=lmsify_theme)
 
 # Read from environment (Cloud Run sets GOOGLE_CLOUD_PROJECT automatically)
 DEFAULT_PROJECT = os.getenv("GOOGLE_CLOUD_PROJECT", os.getenv("GCP_PROJECT", "project-5f169828-6f8d-450b-923"))
-DEFAULT_LOCATION = "us-central1"
+DEFAULT_LOCATION = "global"
 # Base64 image transfer (no GCS permissions needed)
 # Updated: DAV1D v3 - Fixed spinner + Flash-Lite greetings (2025-12-10)
 DEFAULT_ENGINE_ID = "3723065118905335808"
@@ -55,7 +55,8 @@ DEFAULT_ENGINE_ID = "3723065118905335808"
 SEARCH_MODEL = os.getenv("BANDIT_SEARCH_MODEL", "gemini-3-flash-preview")
 RAG_MODEL = os.getenv("BANDIT_RAG_MODEL", "gemini-3-flash-preview")
 RAG_EMBED_MODEL = os.getenv("BANDIT_RAG_EMBED_MODEL", "text-embedding-004")
-DEFAULT_MODEL = "gemini-3-flash-preview"  # 1M context, $0.50/$3.00 per 1M tokens
+DEFAULT_MODEL = "gemini-3-flash-preview"  # 1M context
+PRO_MODEL = "gemini-3.1-pro-preview"      # Advanced reasoning
 VERTEX_AI_SEARCH_LOCATION = os.getenv("VERTEX_AI_SEARCH_LOCATION", "global")
 VERTEX_AI_SEARCH_DATA_STORE_ID = os.getenv("VERTEX_AI_SEARCH_DATA_STORE_ID")
 
@@ -368,7 +369,7 @@ def get_engine_resource_name(project: str, location: str, engine_id: str) -> str
 
 def _resolve_model_location(model_name: str, requested_location: str) -> str:
     """Route models that require global endpoints; otherwise use requested/default."""
-    if model_name.startswith("gemini-3-") or model_name.startswith("text-embedding-"):
+    if model_name.startswith("gemini-3") or model_name.startswith("text-embedding-") or "live" in model_name:
         return "global"
     return requested_location or DEFAULT_LOCATION
 
@@ -600,7 +601,7 @@ def run_rag(query: str, project: str, data_store_location: str, data_store_id: s
 
     context = "\n\n".join(snippets)
 
-    rag_client = genai.Client(vertexai=True, project=project, location=_resolve_model_location(RAG_MODEL, "us-central1")) 
+    rag_client = genai.Client(vertexai=True, project=project, location=_resolve_model_location(RAG_MODEL, "global")) 
 
     prompt = (
         "Use the following snippets from the knowledge base to answer the question.\n"
@@ -654,8 +655,8 @@ async def main():
     status_table.add_column("", style="white")
     status_table.add_row("🎯 Engine", args.engine_id)
     status_table.add_row("📍 Location", args.location)
-    status_table.add_row("🧠 Default", "gemini-3-flash-preview")
-    status_table.add_row("⚡ Models", "Flash 3 (1M ctx) → Pro 3 (deep think)")
+    status_table.add_row("🧠 Default", "Gemini 3 Flash (1M context)")
+    status_table.add_row("⚡ Models", "Flash 3 (Fast) → Pro 3.1 (Deep Reasoning)")
     console.print(status_table)
     console.print()
 
